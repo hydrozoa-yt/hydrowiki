@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DbArticles {
 
@@ -44,6 +46,33 @@ public class DbArticles {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Retrieves an article by its title.
+     */
+    public static List<RArticle> getAll(Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            select 
+                * 
+            from 
+                articles
+            ;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            List<RArticle> result = new ArrayList<>();
+            try (ResultSet rs = pstmt.executeQuery();) {
+                while (rs.next()) {
+                    result.add(articleFromResultSet(rs));
+                }
+            }
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return List.of();
     }
 
     public static int insert(String title, String content, Connection con, Counter counter) {
