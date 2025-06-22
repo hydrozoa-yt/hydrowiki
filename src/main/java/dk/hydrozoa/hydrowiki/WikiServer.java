@@ -42,7 +42,7 @@ public class WikiServer implements Runnable, ServerContext {
         }
 
         logger.info("Initializing database...");
-        //dbConnectionPool = initializeDbConnectionPool(config);
+        dbConnectionPool = initializeDbConnectionPool(config);
 
         // Create and configure a ThreadPool.
         QueuedThreadPool threadPool = new QueuedThreadPool();
