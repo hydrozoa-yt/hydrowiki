@@ -68,7 +68,7 @@ public class WikiServer implements Runnable {
         StripContextPathWrapper stripResHandler = new StripContextPathWrapper("/files", publicFilesHandler);
 
         mapHandler.addMapping(PathSpec.from("/files/*"), stripResHandler);
-        mapHandler.addMapping(PathSpec.from("/"), new IndexHandler("data/index.html"));
+        mapHandler.addMapping(PathSpec.from("/"), new IndexHandler());
 
         // Set a simple Handler to handle requests/responses.
         server.setHandler(mapHandler);
