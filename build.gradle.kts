@@ -17,6 +17,7 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:2.0.17")
     implementation("org.freemarker:freemarker:2.3.34")
     implementation("com.google.guava:guava:33.4.8-jre")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

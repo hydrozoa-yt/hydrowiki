@@ -13,24 +13,36 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.resource.Resources;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.mariadb.jdbc.MariaDbPoolDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class WikiServer implements Runnable, ServerContext {
 
+    final Logger logger = LoggerFactory.getLogger(WikiServer.class);
+
+    private DataSource dbConnectionPool;
     private Properties config;
 
     public void run() {
         // Load properties
+        logger.info("Loading properties...");
         config = new Properties();
         try {
             config.load(Files.newInputStream(Path.of("data", "config.properties")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        logger.info("Initializing database...");
+        //dbConnectionPool = initializeDbConnectionPool(config);
 
         // Create and configure a ThreadPool.
         QueuedThreadPool threadPool = new QueuedThreadPool();
@@ -89,8 +101,34 @@ public class WikiServer implements Runnable, ServerContext {
         }
     }
 
+    /**
+     * Initializes the database connection pool from the properties previously loaded
+     */
+    private MariaDbPoolDataSource initializeDbConnectionPool(Properties properties) {
+        MariaDbPoolDataSource result = null;
+
+        String dbAddress = properties.getProperty("db.address");
+        String dbUsername = properties.getProperty("db.username");
+        String dbPassword = properties.getProperty("db.password");
+        String dbDatabase = properties.getProperty("db.database");
+        int dbPoolSize = Integer.parseInt(properties.getProperty("db.pool_size"));
+
+        try {
+            result = new MariaDbPoolDataSource("jdbc:mariadb://"+dbAddress+":3306/"+dbDatabase+"?user="+dbUsername+"&password="+dbPassword+"&maxPoolSize="+dbPoolSize);
+        } catch (SQLException throwables) {
+            logger.error("Failed to set user credentials on database connection.");
+            throwables.printStackTrace();
+        }
+        return result;
+    }
+
     @Override
     public Properties getProperties() {
         return config;
+    }
+
+    @Override
+    public DataSource getDBConnectionPool() {
+        return dbConnectionPool;
     }
 }
