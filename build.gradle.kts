@@ -18,7 +18,8 @@ dependencies {
     implementation("org.freemarker:freemarker:2.3.34")
     implementation("com.google.guava:guava:33.4.8-jre")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
-    implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
+    implementation("com.vladsch.flexmark:flexmark-all:0.64.8") // todo decide for flexmark or asciidoctor
+    implementation("org.asciidoctor:asciidoctorj:3.0.0")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
