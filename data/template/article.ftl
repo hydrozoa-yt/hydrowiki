@@ -4,7 +4,10 @@
             <h1>${articleName}</h1>
         </div>
         <div class="col-md-3 text-md-end">
-            <a href="#" class="btn btn-primary rounded-element">Edit page</a>
+            <a href="#" class="btn btn-primary rounded-element">
+                <i class="bi bi-pencil-square me-2"></i>
+                Edit page
+            </a>
         </div>
     </div>
     <p>This is an article, I guess.</p>
