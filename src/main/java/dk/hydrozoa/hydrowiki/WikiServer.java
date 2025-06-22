@@ -1,7 +1,7 @@
 package dk.hydrozoa.hydrowiki;
 
-import dk.hydrozoa.hydrowiki.handlers.IndexHandler;
-import dk.hydrozoa.hydrowiki.handlers.StripContextPathWrapper;
+import dk.hydrozoa.hydrowiki.handlers.pages.IndexHandler;
+import dk.hydrozoa.hydrowiki.handlers.util.StripContextPathWrapper;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.http.pathmap.PathSpec;
 import org.eclipse.jetty.server.*;
@@ -74,7 +74,7 @@ public class WikiServer implements Runnable {
         server.setHandler(mapHandler);
 
         // logging per request
-        server.setRequestLog(new CustomRequestLog(new Slf4jRequestLogWriter(), CustomRequestLog.EXTENDED_NCSA_FORMAT));
+        server.setRequestLog(new CustomRequestLog(new Slf4jRequestLogWriter(), CustomRequestLog.NCSA_FORMAT));
 
         // Start the Server to start accepting connections from clients.
         try {

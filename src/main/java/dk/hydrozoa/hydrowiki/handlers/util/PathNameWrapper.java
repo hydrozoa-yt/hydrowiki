@@ -1,4 +1,4 @@
-package dk.hydrozoa.hydrowiki.handlers;
+package dk.hydrozoa.hydrowiki.handlers.util;
 
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.server.Handler;
