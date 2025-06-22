@@ -1,5 +1,6 @@
 package dk.hydrozoa.hydrowiki.database;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,7 +17,11 @@ public class DbArticles {
         return new RArticle(id, title, content);
     }
 
-    public static RArticle getArticle(String name, Connection con, Counter counter) {
+    /**
+     * Retrieves an article by its title.
+     */
+    public static RArticle get(String title, Connection con, Counter counter) {
+        counter.increment();
         String query = """
             select 
                 * 
@@ -28,9 +33,9 @@ public class DbArticles {
             """;
 
         try (PreparedStatement pstmt = con.prepareStatement(query)) {
-            pstmt.setString(1, name);
+            pstmt.setString(1, title);
 
-            try (ResultSet rs = pstmt.executeQuery()) {
+            try (ResultSet rs = pstmt.executeQuery();) {
                 while (rs.next()) {
                     return articleFromResultSet(rs);
                 }
@@ -41,4 +46,29 @@ public class DbArticles {
         return null;
     }
 
+    public static int insert(String title, String content, Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            INSERT INTO 
+                articles(
+                    title, 
+                    content) 
+                VALUES (?,?);
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setString(1, title);
+            pstmt.setString(2, content);
+            pstmt.executeQuery();
+
+            try (ResultSet rs = con.prepareStatement("SELECT LAST_INSERT_ID()").executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 }

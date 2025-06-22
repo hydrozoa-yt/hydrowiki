@@ -1,7 +1,7 @@
 <div class="container">
     <h1 class="mb-5">New article</h1>
 
-    <form>
+    <form method="post">
         <!-- Article Title Field -->
         <div class="mb-4">
             <label for="articleTitle" class="form-label">Title</label>

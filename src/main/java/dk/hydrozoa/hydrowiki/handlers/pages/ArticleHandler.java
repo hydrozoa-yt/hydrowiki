@@ -10,6 +10,7 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 public class ArticleHandler extends IHandler {
@@ -29,11 +30,23 @@ public class ArticleHandler extends IHandler {
             return true;
         }
 
+        switch (request.getMethod()) {
+            case "POST":
+                return handlePost(pathTokens, request, response, callback);
+            case "GET":
+            default:
+                return handleGet(pathTokens, request, response, callback);
+        }
+    }
+
+    private boolean handleGet(String[] pathTokens, Request request, Response response, Callback callback) {
         String articleName = pathTokens[1];
 
         DbArticles.RArticle article = null;
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            article = DbArticles.getArticle(articleName, con, getDatabaseLookupCounter());
+            article = DbArticles.get(articleName, con, getDatabaseLookupCounter());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
         if (article == null) {
@@ -49,6 +62,11 @@ public class ArticleHandler extends IHandler {
         String fullPage = Templater.renderBaseTemplate(articleName, content);
         sendHtml(200, fullPage, response, callback);
         return true;
+    }
+
+    private boolean handlePost(String[] pathTokens, Request request, Response response, Callback callback) {
+        // todo handle
+        return handleGet(pathTokens, request, response, callback);
     }
 
 }
