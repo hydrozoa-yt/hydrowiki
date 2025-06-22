@@ -10,5 +10,5 @@
             </a>
         </div>
     </div>
-    <p>This is an article, I guess.</p>
+    <p>${articleContent}</p>
 </div>

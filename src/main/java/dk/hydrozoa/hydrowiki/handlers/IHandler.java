@@ -1,6 +1,7 @@
 package dk.hydrozoa.hydrowiki.handlers;
 
 import dk.hydrozoa.hydrowiki.ServerContext;
+import dk.hydrozoa.hydrowiki.database.Counter;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.Handler;
@@ -11,17 +12,24 @@ public abstract class IHandler extends Handler.Abstract {
 
     private ServerContext ctx;
 
+    private Counter databaseLookupCounter;
+
     public IHandler(ServerContext ctx) {
         this.ctx = ctx;
-    }
-
-    protected ServerContext getContext() {
-        return ctx;
+        databaseLookupCounter = new Counter();
     }
 
     protected void sendHtml(int status, String content, Response response, Callback callback) {
         response.setStatus(status);
         response.getHeaders().put(HttpHeader.CONTENT_TYPE, "text/html; charset=UTF-8");
         Content.Sink.write(response, true, content, callback);
+    }
+
+    protected ServerContext getContext() {
+        return ctx;
+    }
+
+    protected Counter getDatabaseLookupCounter() {
+        return databaseLookupCounter;
     }
 }
