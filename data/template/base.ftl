@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/files/lib/bootstrap/bootstrap.min.css" rel="stylesheet">
     <script src="/files/lib/bootstrap/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <title>${title}</title>
 </head>
@@ -26,6 +27,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Random page</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/new/">New article</a>
                     </li>
                 </ul>
             </div>

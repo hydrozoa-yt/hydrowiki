@@ -2,6 +2,7 @@ package dk.hydrozoa.hydrowiki;
 
 import dk.hydrozoa.hydrowiki.handlers.pages.ArticleHandler;
 import dk.hydrozoa.hydrowiki.handlers.pages.IndexHandler;
+import dk.hydrozoa.hydrowiki.handlers.pages.NewArticleHandler;
 import dk.hydrozoa.hydrowiki.handlers.util.StripContextPathWrapper;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.http.pathmap.PathSpec;
@@ -70,6 +71,7 @@ public class WikiServer implements Runnable, ServerContext {
 
         mapHandler.addMapping(PathSpec.from("/files/*"), stripResHandler);
         mapHandler.addMapping(PathSpec.from("/w/*"), new ArticleHandler(this));
+        mapHandler.addMapping(PathSpec.from("/new/"), new NewArticleHandler(this));
         mapHandler.addMapping(PathSpec.from("/"), new IndexHandler(this));
 
         // Set a simple Handler to handle requests/responses.
