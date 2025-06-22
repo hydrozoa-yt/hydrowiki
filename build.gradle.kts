@@ -16,6 +16,7 @@ dependencies {
     implementation("org.eclipse.jetty:jetty-server:12.0.22")
     implementation("org.slf4j:slf4j-simple:2.0.17")
     implementation("org.freemarker:freemarker:2.3.34")
+    implementation("com.google.guava:guava:33.4.8-jre")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

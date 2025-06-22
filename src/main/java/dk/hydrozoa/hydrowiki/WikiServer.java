@@ -1,5 +1,6 @@
 package dk.hydrozoa.hydrowiki;
 
+import dk.hydrozoa.hydrowiki.handlers.pages.ArticleHandler;
 import dk.hydrozoa.hydrowiki.handlers.pages.IndexHandler;
 import dk.hydrozoa.hydrowiki.handlers.util.StripContextPathWrapper;
 import org.eclipse.jetty.http.MimeTypes;
@@ -17,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-public class WikiServer implements Runnable {
+public class WikiServer implements Runnable, ServerContext {
 
     private Properties config;
 
@@ -68,7 +69,8 @@ public class WikiServer implements Runnable {
         StripContextPathWrapper stripResHandler = new StripContextPathWrapper("/files", publicFilesHandler);
 
         mapHandler.addMapping(PathSpec.from("/files/*"), stripResHandler);
-        mapHandler.addMapping(PathSpec.from("/"), new IndexHandler());
+        mapHandler.addMapping(PathSpec.from("/w/*"), new ArticleHandler(this));
+        mapHandler.addMapping(PathSpec.from("/"), new IndexHandler(this));
 
         // Set a simple Handler to handle requests/responses.
         server.setHandler(mapHandler);
@@ -83,5 +85,10 @@ public class WikiServer implements Runnable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Properties getProperties() {
+        return config;
     }
 }
