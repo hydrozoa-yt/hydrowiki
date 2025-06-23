@@ -1,0 +1,29 @@
+<div class="container">
+    <a href="/w/${articleName}" class="d-inline-block text-muted mb-4" style="text-decoration: none;">
+        <i class="bi bi-arrow-left-short me-1"></i>
+        Back
+    </a>
+    <h1 class="mb-5">Edit ${articleName}</h1>
+
+    <form method="post">
+        <!-- Article Content Field -->
+        <div class="mb-4">
+            <label for="articleContent" class="form-label">Content</label>
+            <textarea
+                id="articleContent"
+                name="articleContent"
+                rows="8"
+                class="form-control"
+                required
+            >${articleContentCode}</textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary d-inline-flex align-items-center" type="button">
+                <i class="bi bi-floppy2-fill me-2"></i>
+                Save
+            </button>
+        </div>
+    </form>
+</div>

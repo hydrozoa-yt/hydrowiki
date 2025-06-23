@@ -8,6 +8,7 @@ import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.Fields;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -53,9 +54,30 @@ public class ArticleHandler extends IHandler {
             return false;
         }
 
+        try {
+            Fields fields = Request.getParameters(request); // todo use getQueryParameters instead, as it can't throw an exception
+            if (fields != null) {
+                if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("edit"))) {
+                    // display article for editing
+                    Map model = Map.of(
+                            "articleName", article.title(),
+                            "articleContentCode", article.content()
+                    );
+
+                    String content = Templater.renderTemplate("edit_article.ftl", model);
+                    String fullPage = Templater.renderBaseTemplate(articleName, content);
+                    sendHtml(200, fullPage, response, callback);
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // display article for reading
         Map model = Map.of(
                 "articleName", article.title(),
-                "articleContent", article.content()
+                "articleContent", article.content() // needs to be rendered
         );
 
         String content = Templater.renderTemplate("article.ftl", model);
@@ -65,8 +87,37 @@ public class ArticleHandler extends IHandler {
     }
 
     private boolean handlePost(String[] pathTokens, Request request, Response response, Callback callback) {
-        // todo handle
-        return handleGet(pathTokens, request, response, callback);
+        // find relevant article from url
+        String articleName = pathTokens[1];
+
+        DbArticles.RArticle article = null;
+        try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+            article = DbArticles.get(articleName, con, getDatabaseLookupCounter());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        // do not handle if no article is found
+        if (article == null) {
+            return false;
+        }
+
+        try {
+            Fields fields = Request.getParameters(request);
+            if (fields != null) {
+                if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("edit"))) {
+                    String newContent = fields.getValue("articleContent");
+                    try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                        DbArticles.updateContent(article.id(), newContent, con);
+                    }
+                    return handleGet(pathTokens, request, response, callback);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return false;//handleGet(pathTokens, request, response, callback);
     }
 
 }

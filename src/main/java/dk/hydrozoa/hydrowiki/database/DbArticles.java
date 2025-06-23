@@ -100,4 +100,20 @@ public class DbArticles {
         }
         return -1;
     }
+
+    // todo
+    public static boolean updateContent(int articleID, String newContent, Connection con) {
+        String query = "update articles set content=? where id=?;";
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setString(1, newContent);
+            pstmt.setInt(2, articleID);
+
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
