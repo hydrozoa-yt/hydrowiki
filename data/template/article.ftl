@@ -10,5 +10,5 @@
             </a>
         </div>
     </div>
-    <p>${articleContent}</p>
+    ${articleContent}
 </div>

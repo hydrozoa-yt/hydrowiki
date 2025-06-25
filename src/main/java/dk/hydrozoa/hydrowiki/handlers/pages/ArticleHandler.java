@@ -5,6 +5,7 @@ import dk.hydrozoa.hydrowiki.Templater;
 import dk.hydrozoa.hydrowiki.Util;
 import dk.hydrozoa.hydrowiki.database.DbArticles;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
+import dk.hydrozoa.hydrowiki.ui.WikiTextParser;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
@@ -16,8 +17,11 @@ import java.util.Map;
 
 public class ArticleHandler extends IHandler {
 
+    private WikiTextParser parser;
+
     public ArticleHandler(ServerContext ctx) {
         super(ctx);
+        parser = new WikiTextParser();
     }
 
     @Override
@@ -78,7 +82,7 @@ public class ArticleHandler extends IHandler {
         // display article for reading
         Map model = Map.of(
                 "articleName", article.title(),
-                "articleContent", article.content() // needs to be rendered
+                "articleContent", parser.parse(article.content())
         );
 
         String content = Templater.renderTemplate("article.ftl", model);
