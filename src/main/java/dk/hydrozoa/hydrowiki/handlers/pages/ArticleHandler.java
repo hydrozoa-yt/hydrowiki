@@ -36,11 +36,11 @@ public class ArticleHandler extends IHandler {
                 return handlePost(pathTokens, request, response, callback);
             case "GET":
             default:
-                return handleGet(pathTokens, request, response, callback);
+                return handleGet("", pathTokens, request, response, callback);
         }
     }
 
-    private boolean handleGet(String[] pathTokens, Request request, Response response, Callback callback) {
+    private boolean handleGet(String infoMessage, String[] pathTokens, Request request, Response response, Callback callback) {
         String articleName = pathTokens[1];
 
         DbArticles.RArticle article = null;
@@ -61,7 +61,8 @@ public class ArticleHandler extends IHandler {
                     // display article for editing
                     Map model = Map.of(
                             "articleName", article.title(),
-                            "articleContentCode", article.content()
+                            "articleContentCode", article.content(),
+                            "infoMessage", infoMessage
                     );
 
                     String content = Templater.renderTemplate("edit_article.ftl", model);
@@ -110,14 +111,15 @@ public class ArticleHandler extends IHandler {
                     try (Connection con = getContext().getDBConnectionPool().getConnection()) {
                         DbArticles.updateContent(article.id(), newContent, con);
                     }
-                    return handleGet(pathTokens, request, response, callback);
+                    String info = "Saved new version successfully";
+                    return handleGet(info, pathTokens, request, response, callback);
                 }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        return false;//handleGet(pathTokens, request, response, callback);
+        return false;
     }
 
 }

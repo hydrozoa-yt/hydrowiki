@@ -3,6 +3,13 @@
         <i class="bi bi-arrow-left-short me-1"></i>
         Back
     </a>
+    <#if infoMessage?? && infoMessage?has_content>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ${infoMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </#if>
+
     <h1 class="mb-5">Edit ${articleName}</h1>
 
     <form method="post">
