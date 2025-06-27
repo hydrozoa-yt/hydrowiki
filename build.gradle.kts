@@ -20,6 +20,7 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8") // todo decide for flexmark or asciidoctor, lol I guess it's neither
     implementation("org.asciidoctor:asciidoctorj:3.0.0")
+    implementation("io.github.java-diff-utils:java-diff-utils:4.12")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

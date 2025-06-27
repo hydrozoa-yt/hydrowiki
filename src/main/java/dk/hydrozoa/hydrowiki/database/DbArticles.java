@@ -101,7 +101,6 @@ public class DbArticles {
         return -1;
     }
 
-    // todo
     public static boolean updateContent(int articleID, String newContent, Connection con) {
         String query = "update articles set content=? where id=?;";
 

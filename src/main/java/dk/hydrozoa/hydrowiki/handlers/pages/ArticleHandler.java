@@ -1,5 +1,8 @@
 package dk.hydrozoa.hydrowiki.handlers.pages;
 
+import com.github.difflib.DiffUtils;
+import com.github.difflib.UnifiedDiffUtils;
+import com.github.difflib.patch.Patch;
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
 import dk.hydrozoa.hydrowiki.Util;
@@ -13,6 +16,9 @@ import org.eclipse.jetty.util.Fields;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class ArticleHandler extends IHandler {
@@ -115,6 +121,22 @@ public class ArticleHandler extends IHandler {
                     try (Connection con = getContext().getDBConnectionPool().getConnection()) {
                         DbArticles.updateContent(article.id(), newContent, con);
                     }
+
+                    // todo finish
+                    List<String> oldLines = Arrays.asList(article.content().split("\n"));
+                    List<String> newLines = Arrays.asList(newContent.split("\n"));
+
+                    Patch<String> patch = DiffUtils.diff(oldLines, newLines);
+
+                    List<String> unifiedDiff = UnifiedDiffUtils.generateUnifiedDiff(
+                            article.title(),
+                            article.title(),
+                            oldLines,
+                            patch,
+                            0);
+
+                    unifiedDiff.forEach(System.out::println);
+
                     String info = "Saved new version successfully";
                     return handleGet(info, pathTokens, request, response, callback);
                 }
@@ -122,8 +144,6 @@ public class ArticleHandler extends IHandler {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
         return false;
     }
-
 }
