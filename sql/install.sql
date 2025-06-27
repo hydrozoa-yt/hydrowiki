@@ -23,6 +23,14 @@ CREATE TABLE IF NOT EXISTS `articles` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS `article_edits` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `article_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `unified_diff_to_prev` TEXT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO `users` (`username`, `email`, `password`) VALUES
 ('admin_user', 'admin@example.com', 'password'),
 ('test_user', 'test@example.com', 'password');
