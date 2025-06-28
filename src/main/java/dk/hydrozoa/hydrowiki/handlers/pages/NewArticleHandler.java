@@ -50,7 +50,7 @@ public class NewArticleHandler extends IHandler {
         }
 
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            DbArticles.insert(articleTitle, articleContent, con, getDatabaseLookupCounter());
+            DbArticles.insertArticle(articleTitle, articleContent, con, getDatabaseLookupCounter());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

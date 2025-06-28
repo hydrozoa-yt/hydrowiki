@@ -1,6 +1,5 @@
 package dk.hydrozoa.hydrowiki.database;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +11,8 @@ public class DbArticles {
 
     public record RArticle(int id, String title, String content){}
 
+    public record RArticleEdit(int articleId, int userId, String diff) {}
+
     private static RArticle articleFromResultSet(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String title = rs.getString("title");
@@ -22,7 +23,7 @@ public class DbArticles {
     /**
      * Retrieves an article by its title.
      */
-    public static RArticle get(String title, Connection con, Counter counter) {
+    public static RArticle getArticle(String title, Connection con, Counter counter) {
         counter.increment();
         String query = """
             select 
@@ -51,7 +52,7 @@ public class DbArticles {
     /**
      * Retrieves an article by its title.
      */
-    public static List<RArticle> getAll(Connection con, Counter counter) {
+    public static List<RArticle> getAllArticles(Connection con, Counter counter) {
         counter.increment();
         String query = """
             select 
@@ -75,7 +76,7 @@ public class DbArticles {
         return List.of();
     }
 
-    public static int insert(String title, String content, Connection con, Counter counter) {
+    public static int insertArticle(String title, String content, Connection con, Counter counter) {
         counter.increment();
         String query = """
             INSERT INTO 
@@ -101,7 +102,40 @@ public class DbArticles {
         return -1;
     }
 
-    public static boolean updateContent(int articleID, String newContent, Connection con) {
+    public static int insertArticleEdit(int articleId, String diff, Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            INSERT INTO article_edits (article_id, version, user_id, unified_diff_to_prev)
+            SELECT
+                ? AS article_id,
+                COALESCE(MAX(ae.version), 0) + 1 AS version,
+                -1 AS user_id,
+                ? AS unified_diff_to_prev
+            FROM
+                article_edits AS ae
+            WHERE
+                ae.article_id = ?;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setInt(1, articleId);
+            pstmt.setString(2, diff);
+            pstmt.setInt(3, articleId);
+            pstmt.executeQuery();
+
+            try (ResultSet rs = con.prepareStatement("SELECT LAST_INSERT_ID()").executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public static boolean updateArticleContent(int articleID, String newContent, Connection con, Counter counter) {
+        counter.increment();
         String query = "update articles set content=? where id=?;";
 
         try (PreparedStatement pstmt = con.prepareStatement(query)) {

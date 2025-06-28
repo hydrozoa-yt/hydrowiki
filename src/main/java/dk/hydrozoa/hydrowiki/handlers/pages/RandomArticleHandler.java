@@ -25,7 +25,7 @@ public class RandomArticleHandler extends IHandler {
     public boolean handle(Request request, Response response, Callback callback) {
 
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            List<DbArticles.RArticle> list = DbArticles.getAll(con, getDatabaseLookupCounter());
+            List<DbArticles.RArticle> list = DbArticles.getAllArticles(con, getDatabaseLookupCounter());
             int index = random.nextInt(list.size());
             DbArticles.RArticle selected = list.get(index);
             Response.sendRedirect(request, response, callback, "/w/"+selected.title());

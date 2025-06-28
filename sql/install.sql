@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `articles` (
 CREATE TABLE IF NOT EXISTS `article_edits` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `article_id` INT NOT NULL,
+    `version` INT NOT NULL,
     `user_id` INT NOT NULL,
     `unified_diff_to_prev` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP

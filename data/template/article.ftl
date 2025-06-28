@@ -4,6 +4,10 @@
             <h1>${articleName}</h1>
         </div>
         <div class="col-md-3 text-md-end">
+            <a href="?action=history" class="btn btn-primary rounded-element">
+                <i class="bi bi-clock-history me-2"></i>
+                History
+            </a>
             <a href="?action=edit" class="btn btn-primary rounded-element">
                 <i class="bi bi-pencil-square me-2"></i>
                 Edit page

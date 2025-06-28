@@ -21,7 +21,7 @@ public class Util {
     /**
      * @return  UnifiedDiff to get from orig to revised
      */
-    public String generateDiffs(String title, String origLines, String revisedLines) {
+    public static String generateDiffs(String title, String origLines, String revisedLines) {
         List<String> oldLines = Arrays.asList(origLines.split("\n"));
         List<String> newLines = Arrays.asList(revisedLines.split("\n"));
 

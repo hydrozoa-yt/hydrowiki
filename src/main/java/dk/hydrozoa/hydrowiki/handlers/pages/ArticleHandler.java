@@ -16,7 +16,6 @@ import org.eclipse.jetty.util.Fields;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +54,7 @@ public class ArticleHandler extends IHandler {
 
         DbArticles.RArticle article = null;
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            article = DbArticles.get(articleName, con, getDatabaseLookupCounter());
+            article = DbArticles.getArticle(articleName, con, getDatabaseLookupCounter());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -75,7 +74,18 @@ public class ArticleHandler extends IHandler {
                             "infoMessage", infoMessage
                     );
 
-                    String content = Templater.renderTemplate("edit_article.ftl", model);
+                    String content = Templater.renderTemplate("article_edit.ftl", model);
+                    String fullPage = Templater.renderBaseTemplate(articleName, content);
+                    sendHtml(200, fullPage, response, callback);
+                    return true;
+                }
+                if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("history"))) {
+                    // display article history
+                    Map model = Map.of(
+                            "articleName", article.title()
+                    );
+
+                    String content = Templater.renderTemplate("article_history.ftl", model);
                     String fullPage = Templater.renderBaseTemplate(articleName, content);
                     sendHtml(200, fullPage, response, callback);
                     return true;
@@ -103,7 +113,7 @@ public class ArticleHandler extends IHandler {
 
         DbArticles.RArticle article = null;
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            article = DbArticles.get(articleName, con, getDatabaseLookupCounter());
+            article = DbArticles.getArticle(articleName, con, getDatabaseLookupCounter());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -119,23 +129,10 @@ public class ArticleHandler extends IHandler {
                 if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("edit"))) {
                     String newContent = fields.getValue("articleContent");
                     try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-                        DbArticles.updateContent(article.id(), newContent, con);
+                        DbArticles.updateArticleContent(article.id(), newContent, con, getDatabaseLookupCounter());
+                        String diffToPrevious = Util.generateDiffs(article.title(), newContent, article.content());
+                        DbArticles.insertArticleEdit(article.id(), diffToPrevious, con, getDatabaseLookupCounter());
                     }
-
-                    // todo finish
-                    List<String> oldLines = Arrays.asList(article.content().split("\n"));
-                    List<String> newLines = Arrays.asList(newContent.split("\n"));
-
-                    Patch<String> patch = DiffUtils.diff(oldLines, newLines);
-
-                    List<String> unifiedDiff = UnifiedDiffUtils.generateUnifiedDiff(
-                            article.title(),
-                            article.title(),
-                            oldLines,
-                            patch,
-                            0);
-
-                    unifiedDiff.forEach(System.out::println);
 
                     String info = "Saved new version successfully";
                     return handleGet(info, pathTokens, request, response, callback);
