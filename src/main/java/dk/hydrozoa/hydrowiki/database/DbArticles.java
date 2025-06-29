@@ -58,6 +58,34 @@ public class DbArticles {
         return null;
     }
 
+    public static RArticleEdit getArticleEdit(int articleId, int version, Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            select 
+                * 
+            from 
+                article_edits
+            where 
+                article_id=?
+                && version=?
+            ;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setInt(1, articleId);
+            pstmt.setInt(2, version);
+
+            try (ResultSet rs = pstmt.executeQuery();) {
+                while (rs.next()) {
+                    return articleEditFromResultSet(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static List<RArticle> getAllArticles(Connection con, Counter counter) {
         counter.increment();
         String query = """

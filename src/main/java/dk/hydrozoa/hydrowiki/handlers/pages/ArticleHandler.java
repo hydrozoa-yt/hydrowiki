@@ -3,6 +3,7 @@ package dk.hydrozoa.hydrowiki.handlers.pages;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
+import com.github.difflib.text.DiffRowGenerator;
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
 import dk.hydrozoa.hydrowiki.Util;
@@ -64,43 +65,84 @@ public class ArticleHandler extends IHandler {
             return false;
         }
 
-        try {
-            Fields fields = Request.getParameters(request); // todo use getQueryParameters instead, as it can't throw an exception
-            if (fields != null) {
-                if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("edit"))) {
-                    // display article for editing
-                    Map model = Map.of(
-                            "articleName", article.title(),
-                            "articleContentCode", article.content(),
-                            "infoMessage", infoMessage
-                    );
+        Fields fields = Request.extractQueryParameters(request); // todo use getQueryParameters instead, as it can't throw an exception
+        if (fields != null) {
+            // todo dont have to iterate over the fields multiple times, should just be once
+            if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("edit"))) {
+                // display article for editing
+                Map model = Map.of(
+                        "articleName", article.title(),
+                        "articleContentCode", article.content(),
+                        "infoMessage", infoMessage
+                );
 
-                    String content = Templater.renderTemplate("article_edit.ftl", model);
-                    String fullPage = Templater.renderBaseTemplate(articleName, content);
-                    sendHtml(200, fullPage, response, callback);
-                    return true;
-                }
-                if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("history"))) {
-                    // display article history
-                    List<String> history = new ArrayList<>();
-                    try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-                        List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(con, getDatabaseLookupCounter());
-                        edits.forEach(edit -> history.add("Version "+edit.version()));
-                    }
-
-                    Map model = Map.of(
-                            "articleName", article.title(),
-                            "history", history
-                    );
-
-                    String content = Templater.renderTemplate("article_history.ftl", model);
-                    String fullPage = Templater.renderBaseTemplate(articleName, content);
-                    sendHtml(200, fullPage, response, callback);
-                    return true;
-                }
+                String content = Templater.renderTemplate("article_edit.ftl", model);
+                String fullPage = Templater.renderBaseTemplate(articleName, content);
+                sendHtml(200, fullPage, response, callback);
+                return true;
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("history"))) {
+                // display article history
+                List<String> history = new ArrayList<>();
+                try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                    List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(con, getDatabaseLookupCounter());
+                    edits.forEach(edit -> history.add("Version "+edit.version()));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Map model = Map.of(
+                        "articleName", article.title(),
+                        "history", history
+                );
+
+                String content = Templater.renderTemplate("article_history.ftl", model);
+                String fullPage = Templater.renderBaseTemplate(articleName, content);
+                sendHtml(200, fullPage, response, callback);
+                return true;
+            }
+            if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("diff") && p.getValue().equalsIgnoreCase("prev"))) {
+                // display article version compared with previous version
+
+                if (fields.getValue("id") == null) {
+                    return false;
+                }
+                int versionNumber = fields.get("id").getValueAsInt();
+
+                DbArticles.RArticleEdit edit = null;
+                try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                    edit = DbArticles.getArticleEdit(article.id(), versionNumber, con, getDatabaseLookupCounter());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // todo get newest version and then get all edits in between the requested and the newest version.
+                // todo then apply the patches sequentially until the requested version is reached.
+                // todo then apply the patch from the requested version to recreate the lines of the previous version
+                // todo then create a DiffRowGenerator to generate diffrows for the diff between the versions and display in human readable form
+
+                //DiffRowGenerator gen = DiffRowGenerator.create().build();
+                //gen.generateDiffRows()
+
+
+                /*List<String> history = new ArrayList<>();
+                try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                    List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(con, getDatabaseLookupCounter());
+                    edits.forEach(edit -> history.add("Version "+edit.version()));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Map model = Map.of(
+                        "articleName", article.title(),
+                        "history", history
+                );
+
+                String content = Templater.renderTemplate("article_history.ftl", model);
+                String fullPage = Templater.renderBaseTemplate(articleName, content);
+                sendHtml(200, fullPage, response, callback);
+                return true;*/
+            }
         }
 
         // display article for reading
