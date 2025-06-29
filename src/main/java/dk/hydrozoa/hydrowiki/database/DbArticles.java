@@ -86,6 +86,42 @@ public class DbArticles {
         return null;
     }
 
+    /**
+     * Gets all the edits between the newest version and the specified version, ordered by the newest version first.
+     */
+    public static List<RArticleEdit> getArticleEditsSince(int articleId, int version, Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            SELECT
+                 *
+             FROM
+                 article_edits
+             WHERE
+                 article_id = ?  -- Replace with the actual article ID
+                 AND version >= ? -- Replace with the starting version you're interested in
+                 AND version <= (SELECT MAX(version) FROM article_edits WHERE article_id = ?)
+             ORDER BY
+                 version DESC;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setInt(1, articleId);
+            pstmt.setInt(2, version);
+            pstmt.setInt(3, articleId);
+
+            try (ResultSet rs = pstmt.executeQuery();) {
+                List<RArticleEdit> result = new ArrayList<>();
+                while (rs.next()) {
+                    result.add(articleEditFromResultSet(rs));
+                }
+                return result;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return List.of();
+    }
+
     public static List<RArticle> getAllArticles(Connection con, Counter counter) {
         counter.increment();
         String query = """

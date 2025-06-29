@@ -1,8 +1,9 @@
 package dk.hydrozoa.hydrowiki.handlers.pages;
 
-import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
+import com.github.difflib.patch.PatchFailedException;
+import com.github.difflib.text.DiffRow;
 import com.github.difflib.text.DiffRowGenerator;
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
@@ -65,7 +66,7 @@ public class ArticleHandler extends IHandler {
             return false;
         }
 
-        Fields fields = Request.extractQueryParameters(request); // todo use getQueryParameters instead, as it can't throw an exception
+        Fields fields = Request.extractQueryParameters(request);
         if (fields != null) {
             // todo dont have to iterate over the fields multiple times, should just be once
             if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("edit"))) {
@@ -76,17 +77,17 @@ public class ArticleHandler extends IHandler {
                         "infoMessage", infoMessage
                 );
 
-                String content = Templater.renderTemplate("article_edit.ftl", model);
+                String content = Templater.renderTemplate("article/article_edit.ftl", model);
                 String fullPage = Templater.renderBaseTemplate(articleName, content);
                 sendHtml(200, fullPage, response, callback);
                 return true;
             }
             if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("history"))) {
                 // display article history
-                List<String> history = new ArrayList<>();
+                List<Map<String,Object>> history = new ArrayList<>();
                 try (Connection con = getContext().getDBConnectionPool().getConnection()) {
                     List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(con, getDatabaseLookupCounter());
-                    edits.forEach(edit -> history.add("Version "+edit.version()));
+                    edits.forEach(edit -> history.add(Map.of("version", edit.version(), "text", "Version "+edit.version())));
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -96,24 +97,66 @@ public class ArticleHandler extends IHandler {
                         "history", history
                 );
 
-                String content = Templater.renderTemplate("article_history.ftl", model);
+                String content = Templater.renderTemplate("article/article_history.ftl", model);
                 String fullPage = Templater.renderBaseTemplate(articleName, content);
                 sendHtml(200, fullPage, response, callback);
                 return true;
             }
             if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("diff") && p.getValue().equalsIgnoreCase("prev"))) {
                 // display article version compared with previous version
-
                 if (fields.getValue("id") == null) {
                     return false;
                 }
                 int versionNumber = fields.get("id").getValueAsInt();
 
-                DbArticles.RArticleEdit edit = null;
+                // get all edits between the cnewest and the requested
+                List<DbArticles.RArticleEdit> edits = null;
                 try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-                    edit = DbArticles.getArticleEdit(article.id(), versionNumber, con, getDatabaseLookupCounter());
+                    edits = DbArticles.getArticleEditsSince(article.id(), versionNumber, con, getDatabaseLookupCounter());
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+
+                if (edits.size() == 1) { // todo extend to older versions
+                    String[] diffLines = edits.get(0).diff().split("\n");
+                    Patch<String> patch = UnifiedDiffUtils.parseUnifiedDiff(Arrays.asList(diffLines));
+
+                    List<String> newest = Arrays.asList(article.content().split("\n"));
+                    List<String> restored = null;
+                    try {
+                        restored = patch.applyTo(newest);
+                    } catch (PatchFailedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    DiffRowGenerator generator = DiffRowGenerator.create()
+                            .showInlineDiffs(true)
+                            .mergeOriginalRevised(true)
+                            .inlineDiffByWord(true)
+                            .oldTag(f -> "~")      //introduce markdown style for strikethrough
+                            .newTag(f -> "*")     //introduce markdown style for bold
+                            .build();
+
+                    List<DiffRow> rows = generator.generateDiffRows(
+                            restored,
+                            newest);
+
+                    StringBuilder diffBuilder = new StringBuilder();
+                    rows.forEach(row -> {
+                        diffBuilder.append(row.getOldLine());
+                        diffBuilder.append("<br />");
+                    });
+
+                    Map model = Map.of(
+                            "articleName", article.title(),
+                            "version", versionNumber,
+                            "changes", diffBuilder.toString()
+                    );
+
+                    String content = Templater.renderTemplate("article/article_diff.ftl", model);
+                    String fullPage = Templater.renderBaseTemplate(articleName, content);
+                    sendHtml(200, fullPage, response, callback);
+                    return true;
                 }
 
                 // todo get newest version and then get all edits in between the requested and the newest version.
@@ -151,7 +194,7 @@ public class ArticleHandler extends IHandler {
                 "articleContent", parser.parse(article.content())
         );
 
-        String content = Templater.renderTemplate("article.ftl", model);
+        String content = Templater.renderTemplate("article/article.ftl", model);
         String fullPage = Templater.renderBaseTemplate(articleName, content);
         sendHtml(200, fullPage, response, callback);
         return true;

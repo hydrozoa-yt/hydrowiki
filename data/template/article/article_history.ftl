@@ -9,7 +9,9 @@
     <ul class="list-unstyled">
         <#if history?? && history?size gt 0>
             <#list history as item>
-                <li class="list-group-item">${item}</li>
+                <li class="list-group-item">
+                    <a href="?diff=prev&id=${item.version}">${item.text}</a>
+                </li>
             </#list>
         <#else>
             <li class="list-group-item text-muted">No history to display.</li>
