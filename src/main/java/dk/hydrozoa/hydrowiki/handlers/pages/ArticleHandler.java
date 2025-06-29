@@ -16,6 +16,7 @@ import org.eclipse.jetty.util.Fields;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -81,8 +82,15 @@ public class ArticleHandler extends IHandler {
                 }
                 if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("history"))) {
                     // display article history
+                    List<String> history = new ArrayList<>();
+                    try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                        List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(con, getDatabaseLookupCounter());
+                        edits.forEach(edit -> history.add("Version "+edit.version()));
+                    }
+
                     Map model = Map.of(
-                            "articleName", article.title()
+                            "articleName", article.title(),
+                            "history", history
                     );
 
                     String content = Templater.renderTemplate("article_history.ftl", model);

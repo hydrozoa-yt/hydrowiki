@@ -11,13 +11,22 @@ public class DbArticles {
 
     public record RArticle(int id, String title, String content){}
 
-    public record RArticleEdit(int articleId, int userId, String diff) {}
+    public record RArticleEdit(int id, int articleId, int version, int userId, String diff) {}
 
     private static RArticle articleFromResultSet(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String title = rs.getString("title");
         String content = rs.getString("content");;
         return new RArticle(id, title, content);
+    }
+
+    private static RArticleEdit articleEditFromResultSet(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        int articleId = rs.getInt("article_id");
+        int version = rs.getInt("version");
+        int userId = rs.getInt("user_id");
+        String diff = rs.getString("unified_diff_to_prev");
+        return new RArticleEdit(id, articleId, version, userId, diff);
     }
 
     /**
@@ -49,9 +58,6 @@ public class DbArticles {
         return null;
     }
 
-    /**
-     * Retrieves an article by its title.
-     */
     public static List<RArticle> getAllArticles(Connection con, Counter counter) {
         counter.increment();
         String query = """
@@ -67,6 +73,30 @@ public class DbArticles {
             try (ResultSet rs = pstmt.executeQuery();) {
                 while (rs.next()) {
                     result.add(articleFromResultSet(rs));
+                }
+            }
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return List.of();
+    }
+
+    public static List<RArticleEdit> getAllArticleEdits(Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            select 
+                * 
+            from 
+                article_edits
+            ;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            List<RArticleEdit> result = new ArrayList<>();
+            try (ResultSet rs = pstmt.executeQuery();) {
+                while (rs.next()) {
+                    result.add(articleEditFromResultSet(rs));
                 }
             }
             return result;

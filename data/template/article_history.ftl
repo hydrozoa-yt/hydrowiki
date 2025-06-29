@@ -5,6 +5,14 @@
     </a>
 
     <h1 class="mb-5">History for ${articleName}</h1>
-    <p>History goes here</p>
 
+    <ul class="list-unstyled">
+        <#if history?? && history?size gt 0>
+            <#list history as item>
+                <li class="list-group-item">${item}</li>
+            </#list>
+        <#else>
+            <li class="list-group-item text-muted">No history to display.</li>
+        </#if>
+    </ul>
 </div>
