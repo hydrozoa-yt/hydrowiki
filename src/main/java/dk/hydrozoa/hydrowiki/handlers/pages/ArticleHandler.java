@@ -133,8 +133,8 @@ public class ArticleHandler extends IHandler {
                             .showInlineDiffs(true)
                             .mergeOriginalRevised(true)
                             .inlineDiffByWord(true)
-                            .oldTag(f -> "~")      //introduce markdown style for strikethrough
-                            .newTag(f -> "*")     //introduce markdown style for bold
+                            .oldTag(f -> f ? "<s>" : "</s>")      //introduce markdown style for strikethrough
+                            .newTag(f -> f? "<b>" : "</b>")     //introduce markdown style for bold
                             .build();
 
                     List<DiffRow> rows = generator.generateDiffRows(
