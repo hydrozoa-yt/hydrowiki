@@ -84,7 +84,7 @@ public class ArticleHandler extends IHandler {
             }
             if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("history"))) {
                 // display article history
-                List<Map<String,Object>> history = new ArrayList<>();
+                List<Map> history = new ArrayList<>();
                 try (Connection con = getContext().getDBConnectionPool().getConnection()) {
                     List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(con, getDatabaseLookupCounter());
                     edits.forEach(edit -> history.add(Map.of("version", edit.version(), "text", "Version "+edit.version())));
