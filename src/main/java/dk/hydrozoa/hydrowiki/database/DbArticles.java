@@ -134,10 +134,9 @@ public class DbArticles {
 
         try (PreparedStatement pstmt = con.prepareStatement(query)) {
             List<RArticle> result = new ArrayList<>();
-            try (ResultSet rs = pstmt.executeQuery();) {
-                while (rs.next()) {
-                    result.add(articleFromResultSet(rs));
-                }
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                result.add(articleFromResultSet(rs));
             }
             return result;
         } catch (SQLException e) {
@@ -146,24 +145,27 @@ public class DbArticles {
         return List.of();
     }
 
-    public static List<RArticleEdit> getAllArticleEdits(Connection con, Counter counter) {
+    public static List<RArticleEdit> getAllArticleEdits(int articleId, Connection con, Counter counter) {
         counter.increment();
         String query = """
-            select 
-                * 
-            from 
+            SELECT
+                *
+            FROM
                 article_edits
+            WHERE
+                article_id = ?
             ORDER BY
                 version DESC
             ;
             """;
 
         try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setInt(1, articleId);
+
             List<RArticleEdit> result = new ArrayList<>();
-            try (ResultSet rs = pstmt.executeQuery();) {
-                while (rs.next()) {
-                    result.add(articleEditFromResultSet(rs));
-                }
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                result.add(articleEditFromResultSet(rs));
             }
             return result;
         } catch (SQLException e) {

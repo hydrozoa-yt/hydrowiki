@@ -86,7 +86,7 @@ public class ArticleHandler extends IHandler {
                 // display article history
                 List<Map> history = new ArrayList<>();
                 try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-                    List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(con, getDatabaseLookupCounter());
+                    List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(article.id(), con, getDatabaseLookupCounter());
                     edits.forEach(edit -> history.add(Map.of("version", edit.version(), "text", "Version "+edit.version())));
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -109,7 +109,7 @@ public class ArticleHandler extends IHandler {
                 }
                 int versionNumber = fields.get("id").getValueAsInt();
 
-                // get all edits between the cnewest and the requested
+                // get all edits between the newest and the requested
                 List<DbArticles.RArticleEdit> edits = null;
                 try (Connection con = getContext().getDBConnectionPool().getConnection()) {
                     edits = DbArticles.getArticleEditsSince(article.id(), versionNumber, con, getDatabaseLookupCounter());
