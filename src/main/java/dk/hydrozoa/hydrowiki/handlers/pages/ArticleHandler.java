@@ -117,7 +117,7 @@ public class ArticleHandler extends IHandler {
                     throw new RuntimeException(e);
                 }
 
-                if (edits.size() == 1) { // todo extend to older versions
+                /*if (edits.size() == 1) { // todo extend to older versions
                     String[] diffLines = edits.get(0).diff().split("\n");
                     Patch<String> patch = UnifiedDiffUtils.parseUnifiedDiff(Arrays.asList(diffLines));
 
@@ -157,34 +157,54 @@ public class ArticleHandler extends IHandler {
                     String fullPage = Templater.renderBaseTemplate(articleName, content);
                     sendHtml(200, fullPage, response, callback);
                     return true;
-                }
+                } else if (edits.size() > 1) {*/
+                    String[] diffLines = null;
+                    Patch<String> patch = null;
 
-                // todo get newest version and then get all edits in between the requested and the newest version.
-                // todo then apply the patches sequentially until the requested version is reached.
-                // todo then apply the patch from the requested version to recreate the lines of the previous version
-                // todo then create a DiffRowGenerator to generate diffrows for the diff between the versions and display in human readable form
+                    List<String> latest = Arrays.asList(article.content().split("\n"));
+                    List<String> previous = null;
+                    for (int i = 0; i < edits.size(); i++) {
+                        if (i > 0) { // not first iteration
+                            latest = previous;
+                        }
+                        diffLines = edits.get(i).diff().split("\n");
+                        patch = UnifiedDiffUtils.parseUnifiedDiff(Arrays.asList(diffLines));
+                        try {
+                            previous = patch.applyTo(latest);
+                        } catch (PatchFailedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
 
-                //DiffRowGenerator gen = DiffRowGenerator.create().build();
-                //gen.generateDiffRows()
+                    DiffRowGenerator generator = DiffRowGenerator.create()
+                            .showInlineDiffs(true)
+                            .mergeOriginalRevised(true)
+                            .inlineDiffByWord(true)
+                            .oldTag(f -> f ? "<s>" : "</s>")      //introduce markdown style for strikethrough
+                            .newTag(f -> f? "<b>" : "</b>")     //introduce markdown style for bold
+                            .build();
 
+                    List<DiffRow> rows = generator.generateDiffRows(
+                            previous,
+                            latest);
 
-                /*List<String> history = new ArrayList<>();
-                try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-                    List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(con, getDatabaseLookupCounter());
-                    edits.forEach(edit -> history.add("Version "+edit.version()));
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                    StringBuilder diffBuilder = new StringBuilder();
+                    rows.forEach(row -> {
+                        diffBuilder.append(row.getOldLine());
+                        diffBuilder.append("<br />");
+                    });
 
-                Map model = Map.of(
-                        "articleName", article.title(),
-                        "history", history
-                );
+                    Map model = Map.of(
+                            "articleName", article.title(),
+                            "version", versionNumber,
+                            "changes", diffBuilder.toString()
+                    );
 
-                String content = Templater.renderTemplate("article_history.ftl", model);
-                String fullPage = Templater.renderBaseTemplate(articleName, content);
-                sendHtml(200, fullPage, response, callback);
-                return true;*/
+                    String content = Templater.renderTemplate("article/article_diff.ftl", model);
+                    String fullPage = Templater.renderBaseTemplate(articleName, content);
+                    sendHtml(200, fullPage, response, callback);
+                    return true;
+                //}
             }
         }
 
