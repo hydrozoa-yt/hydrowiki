@@ -20,14 +20,11 @@ public class NewArticleHandler extends IHandler {
     }
 
     @Override
-    public boolean handle(Request request, Response response, Callback callback) throws Exception {
-        switch (request.getMethod()) {
-            case "POST":
-                return handlePost(request, response, callback);
-            case "GET":
-            default:
-                return handleGet(request, response, callback);
-        }
+    public boolean handle(Request request, Response response, Callback callback) {
+        return switch (request.getMethod()) {
+            case "POST" -> handlePost(request, response, callback);
+            default -> handleGet(request, response, callback);
+        };
     }
 
     private boolean handleGet(Request request, Response response, Callback callback) {
@@ -43,14 +40,21 @@ public class NewArticleHandler extends IHandler {
         String articleContent = null;
         try {
             Fields f = Request.getParameters(request);
-            articleTitle = f.getValue("articleTitle");
+            articleTitle = f.getValue("articleTitle").trim();
+            if (articleTitle.contains(" ")) {
+                articleTitle = articleTitle.replace(" ", "_");
+            }
             articleContent = f.getValue("articleContent");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            DbArticles.insertArticle(articleTitle, articleContent, con, getDatabaseLookupCounter());
+            int id = DbArticles.insertArticle(articleTitle, articleContent, con, getDatabaseLookupCounter());
+            if (id != -1) {
+                Response.sendRedirect(request, response, callback, "/w/"+articleTitle);
+                return true;
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

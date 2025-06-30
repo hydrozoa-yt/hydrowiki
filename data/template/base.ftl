@@ -23,7 +23,7 @@
                         <a class="nav-link active" aria-current="page" href="/">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Recent changes</a>
+                        <a class="nav-link" href="/recent-changes/">Recent changes</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/random/">Random page</a>

@@ -1,9 +1,6 @@
 package dk.hydrozoa.hydrowiki.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +8,7 @@ public class DbArticles {
 
     public record RArticle(int id, String title, String content){}
 
-    public record RArticleEdit(int id, int articleId, int version, int userId, String diff) {}
+    public record RArticleEdit(int id, int articleId, int version, int userId, String diff, Timestamp created) {}
 
     private static RArticle articleFromResultSet(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
@@ -26,7 +23,8 @@ public class DbArticles {
         int version = rs.getInt("version");
         int userId = rs.getInt("user_id");
         String diff = rs.getString("unified_diff_to_prev");
-        return new RArticleEdit(id, articleId, version, userId, diff);
+        Timestamp created = rs.getTimestamp("created_at");
+        return new RArticleEdit(id, articleId, version, userId, diff, created);
     }
 
     /**
@@ -166,6 +164,38 @@ public class DbArticles {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 result.add(articleEditFromResultSet(rs));
+            }
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return List.of();
+    }
+
+    public record RArticleEditWithTitle(RArticleEdit edit, String title){}
+
+    public static List<RArticleEditWithTitle> getRecentArticleEdits(Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            SELECT
+                article_edits.*,
+                articles.title
+            FROM
+                article_edits
+            LEFT JOIN
+                articles ON articles.id=article_edits.article_id
+            ORDER BY
+                article_edits.created_at DESC
+            ;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            List<RArticleEditWithTitle> result = new ArrayList<>();
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                RArticleEdit edit = articleEditFromResultSet(rs);
+                String title = rs.getString("title");
+                result.add(new RArticleEditWithTitle(edit, title));
             }
             return result;
         } catch (SQLException e) {
