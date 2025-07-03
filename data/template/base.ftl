@@ -26,6 +26,9 @@
                         <a class="nav-link" href="/recent-changes/">Recent changes</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/all/">All articles</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/random/">Random page</a>
                     </li>
                     <li class="nav-item">

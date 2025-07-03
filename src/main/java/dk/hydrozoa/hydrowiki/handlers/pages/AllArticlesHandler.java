@@ -9,35 +9,33 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 
 import java.sql.Connection;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class RecentChangesHandler extends IHandler {
+public class AllArticlesHandler extends IHandler {
 
-    public RecentChangesHandler(ServerContext ctx) {
+    public AllArticlesHandler(ServerContext ctx) {
         super(ctx);
     }
 
     @Override
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
-        List<DbArticles.RArticleEditWithTitle> results = List.of();
+        List<DbArticles.RArticle> results = List.of();
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            results = DbArticles.getRecentArticleEdits(con, getDatabaseLookupCounter());
+            results = DbArticles.getAllArticles(con, getDatabaseLookupCounter());
         }
 
-        List<Map> history = new ArrayList<>();
+        List<Map> articles = new ArrayList<>();
         results.forEach(row -> {
-            history.add(Map.of(
-                    "title", row.title(),
-                    "version", row.edit().version(),
-                    "timestamp", row.edit().created().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm"))
-            ));
+            articles.add(Map.of(
+                    "title", row.title()
+                    )
+            );
         });
 
-        String content = Templater.renderTemplate("recent_changes.ftl", Map.of("history", history));
-        String fullPage = Templater.renderBaseTemplate("Recent changes", content);
+        String content = Templater.renderTemplate("all_articles.ftl", Map.of("articles", articles));
+        String fullPage = Templater.renderBaseTemplate("All articles", content);
         sendHtml(200, fullPage, response, callback);
         return true;
     }

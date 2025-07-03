@@ -10,7 +10,7 @@
         </div>
     </#if>
 
-    <h1 class="mb-5">Edit ${articleName}</h1>
+    <h1 class="mb-5">Edit ${articleNameHumanReadable}</h1>
 
     <form method="post">
         <!-- Article Content Field -->

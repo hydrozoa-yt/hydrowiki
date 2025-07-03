@@ -73,6 +73,7 @@ public class ArticleHandler extends IHandler {
                 // display article for editing
                 Map model = Map.of(
                         "articleName", article.title(),
+                        "articleNameHumanReadable", article.title().replace("_", " "),
                         "articleContentCode", article.content(),
                         "infoMessage", infoMessage
                 );
@@ -170,6 +171,7 @@ public class ArticleHandler extends IHandler {
         // display article for reading
         Map model = Map.of(
                 "articleName", article.title(),
+                "articleNameHumanReadable", article.title().replace("_", " "),
                 "articleContent", parser.parse(article.content())
         );
 
