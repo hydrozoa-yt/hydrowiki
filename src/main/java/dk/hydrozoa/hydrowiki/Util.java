@@ -34,7 +34,7 @@ public class Util {
                 patch,
                 0);
 
-        unifiedDiff.forEach(System.out::println);
+        //unifiedDiff.forEach(System.out::println);
 
         StringBuilder result = new StringBuilder();
         unifiedDiff.forEach(line -> {

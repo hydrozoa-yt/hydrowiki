@@ -19,12 +19,58 @@ public class WikiTextParser {
                 continue;
             }
 
+            String linkProcessed = processLinks(line);
+
             result.append("<p>");
-            result.append(line);
+            result.append(linkProcessed);
             result.append("</p>");
         }
 
 
         return result.toString();
+    }
+
+    /**
+     * Parses one line of text and replaces [[links]] with <a>links</a>.
+     */
+    private String processLinks(String input) {
+        if (!input.contains("[[")) {
+            return input;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        int linkSearchCurrentIndex = 0;
+        int linkStart = 0;
+        while (true) {
+            linkStart = input.indexOf("[[", linkSearchCurrentIndex);
+            if (linkStart == -1) {
+                // output rest of line
+                sb.append(input.substring(linkSearchCurrentIndex));
+                return sb.toString();
+            }
+
+            int linkEnd = input.indexOf("]]", linkStart);
+            if (linkEnd == -1) {
+                // output rest of line
+                sb.append(input.substring(linkSearchCurrentIndex));
+                return sb.toString();
+            }
+
+            // output text until link
+            sb.append(input.substring(linkSearchCurrentIndex, linkStart));
+
+            // retrieve text inside square brackets
+            String linkText = input.substring(linkStart+2, linkEnd);
+            System.out.println("Linktext: "+linkText);
+
+            // start next search
+            linkSearchCurrentIndex = linkEnd+2;
+
+            // output link
+            sb.append("<a href=\"/w/"+linkText+"\">");
+            sb.append(linkText);
+            sb.append("</a>");
+        }
     }
 }
