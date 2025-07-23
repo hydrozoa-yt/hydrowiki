@@ -9,11 +9,12 @@ The following technologies are used:
 * Gradle, for building
 
 ## Features
-* Simple wikitext parser (only headings and paragraphs)
+* Simple wikitext parser (only headings, wikilinks and paragraphs)
 * Writing new articles
 * Find random article
 * Display recent changes
 * View differences between versions
+* Users and logging in
 
 ## How to run
 ### 1) Database installation
