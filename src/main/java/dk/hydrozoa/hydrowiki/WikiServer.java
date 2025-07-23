@@ -80,6 +80,7 @@ public class WikiServer implements Runnable, ServerContext {
         StripContextPathWrapper stripResHandler = new StripContextPathWrapper("/files", publicFilesHandler);
 
         mapHandler.addMapping(PathSpec.from("/files/*"), stripResHandler);
+        mapHandler.addMapping(PathSpec.from("/login/"), new LoginHandler(this));
         mapHandler.addMapping(PathSpec.from("/w/*"), new ArticleHandler(this));
         mapHandler.addMapping(PathSpec.from("/new/"), new NewArticleHandler(this));
         mapHandler.addMapping(PathSpec.from("/random/"), new RandomArticleHandler(this));
