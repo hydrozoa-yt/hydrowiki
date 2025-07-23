@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `article_edits` (
     `version` INT NOT NULL,
     `user_id` INT NOT NULL,
     `unified_diff_to_prev` TEXT,
+    `character_len_diff` INT NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -38,4 +39,4 @@ INSERT INTO `users` (`username`, `email`, `password`) VALUES
 
 INSERT INTO `articles` (`title`, `content`) VALUES
 ('Invasion_of_the_heymen', 'This is an article describing the historical event "Invasion of the heymen", and it explains the happenings as well as the historical significance of the event.'),
-('Lesson_in_never_backing_down', 'This is a description of the steps one needs to take, in order to never back down.');
+('Lesson_in_never_backing_down', 'This is a description of the steps one needs to take, in order to never back down. \n [[This]] is a wikilink.');

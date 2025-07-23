@@ -22,7 +22,7 @@ public class RecentChangesHandler extends IHandler {
 
     @Override
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
-        List<DbArticles.RArticleEditWithTitle> results = List.of();
+        List<DbArticles.RArticleEditWithExtra> results = List.of();
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
             results = DbArticles.getRecentArticleEdits(con, getDatabaseLookupCounter());
         }
@@ -32,7 +32,9 @@ public class RecentChangesHandler extends IHandler {
             history.add(Map.of(
                     "title", row.title(),
                     "version", row.edit().version(),
-                    "timestamp", row.edit().created().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm"))
+                    "timestamp", row.edit().created().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm")),
+                    "author", row.username(),
+                    "charLenDiff", row.edit().charLenDiff()
             ));
         });
 

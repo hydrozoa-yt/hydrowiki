@@ -19,6 +19,7 @@ import org.eclipse.jetty.util.Fields;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,13 +89,23 @@ public class ArticleHandler extends IHandler {
                 // display article history
                 List<Map> history = new ArrayList<>();
                 try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-                    List<DbArticles.RArticleEdit> edits = DbArticles.getAllArticleEdits(article.id(), con, getDatabaseLookupCounter());
-                    edits.forEach(edit -> history.add(Map.of("version", edit.version(), "text", "Version "+edit.version())));
+                    List<DbArticles.RArticleEditWithExtra> edits = DbArticles.getAllArticleEdits(article.id(), con, getDatabaseLookupCounter());
+                    edits.forEach(editWithExtra -> {
+                        Map model = Map.of(
+                                "timestamp", editWithExtra.edit().created().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd kk:mm")),
+                                "author", editWithExtra.username(),
+                                "version", editWithExtra.edit().version(),
+                                "text", "Version "+editWithExtra.edit().version(),
+                                "charLenDiff", editWithExtra.edit().charLenDiff()
+                        );
+                        history.add(model);
+                    });
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
 
                 Map model = Map.of(
+                        "articleNameHumanReadable", article.title().replace("_", " "),
                         "articleName", article.title(),
                         "history", history
                 );
@@ -157,6 +168,7 @@ public class ArticleHandler extends IHandler {
                 });
 
                 Map model = Map.of(
+                        "articleNameHumanReadable", article.title().replace("_", " "),
                         "articleName", article.title(),
                         "version", versionNumber,
                         "changes", diffBuilder.toString()
@@ -171,6 +183,7 @@ public class ArticleHandler extends IHandler {
 
         // display article for reading
         Map model = Map.of(
+                "loggedIn", getLoggedIn(request) != null,
                 "articleName", article.title(),
                 "articleNameHumanReadable", article.title().replace("_", " "),
                 "articleContent", parser.parse(article.content())
@@ -211,7 +224,8 @@ public class ArticleHandler extends IHandler {
                     try (Connection con = getContext().getDBConnectionPool().getConnection()) {
                         DbArticles.updateArticleContent(article.id(), newContent, con, getDatabaseLookupCounter());
                         String diffToPrevious = Util.generateDiffs(article.title(), newContent, article.content());
-                        DbArticles.insertArticleEdit(user.id(), article.id(), diffToPrevious, con, getDatabaseLookupCounter());
+                        int charDiff = newContent.length() - article.content().length();
+                        DbArticles.insertArticleEdit(user.id(), article.id(), diffToPrevious, charDiff, con, getDatabaseLookupCounter());
                     }
 
                     String info = "Saved new version successfully";

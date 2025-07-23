@@ -62,7 +62,7 @@ public class NewArticleHandler extends IHandler {
             int id = DbArticles.insertArticle(articleTitle, articleContent, con, getDatabaseLookupCounter());
 
             String diffToPrevious = Util.generateDiffs(articleTitle, articleContent, "");
-            DbArticles.insertArticleEdit(user.id(), id, diffToPrevious, con, getDatabaseLookupCounter());
+            DbArticles.insertArticleEdit(user.id(), id, diffToPrevious, articleContent.length(), con, getDatabaseLookupCounter());
 
             if (id != -1) {
                 Response.sendRedirect(request, response, callback, "/w/"+articleTitle);
