@@ -1,5 +1,9 @@
 package dk.hydrozoa.hydrowiki.ui;
 
+// todo add support for images [[file:test.png]]
+// todo add support for external links [[link:test.png]]
+// todo add support for [ref]example.com[/res] and [[resources]]
+// todo add support for lists (ordered and unordered)
 public class WikiTextParser {
 
     private static final String HEADING_1_ID = "=";
@@ -62,7 +66,6 @@ public class WikiTextParser {
 
             // retrieve text inside square brackets
             String linkText = input.substring(linkStart+2, linkEnd);
-            System.out.println("Linktext: "+linkText);
 
             // start next search
             linkSearchCurrentIndex = linkEnd+2;

@@ -23,6 +23,13 @@ CREATE TABLE IF NOT EXISTS `articles` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS `uploaded_media` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `filename` VARCHAR(255) NOT NULL,
+    `user_id` INT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS `article_edits` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `article_id` INT NOT NULL,
