@@ -30,7 +30,7 @@ public class NewArticleHandler extends IHandler {
     private boolean handleGet(Request request, Response response, Callback callback) {
         Map model = Map.of();
         String content = Templater.renderTemplate("new_article.ftl", model);
-        String fullPage = Templater.renderBaseTemplate("New article", content);
+        String fullPage = Templater.renderBaseTemplate(request, "New article", content);
         sendHtml(200, fullPage, response, callback);
         return true;
     }

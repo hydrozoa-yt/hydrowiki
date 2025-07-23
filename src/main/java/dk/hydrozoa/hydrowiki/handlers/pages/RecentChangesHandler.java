@@ -37,7 +37,7 @@ public class RecentChangesHandler extends IHandler {
         });
 
         String content = Templater.renderTemplate("recent_changes.ftl", Map.of("history", history));
-        String fullPage = Templater.renderBaseTemplate("Recent changes", content);
+        String fullPage = Templater.renderBaseTemplate(request,"Recent changes", content);
         sendHtml(200, fullPage, response, callback);
         return true;
     }

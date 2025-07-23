@@ -1,8 +1,11 @@
 package dk.hydrozoa.hydrowiki;
 
+import dk.hydrozoa.hydrowiki.database.DbUsers;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.eclipse.jetty.server.Session;
+import org.eclipse.jetty.server.Request;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,13 +27,26 @@ public class Templater {
         config.setDefaultEncoding("UTF-8");
     }
 
-    public static String renderBaseTemplate(String title, String content) {
+    public static String renderBaseTemplate(Request request, String title, String content) {
+        Session s = request.getSession(false);
+        DbUsers.RUser user = null;
+
+        if (s != null) {
+            user = (DbUsers.RUser) s.getAttribute("user");
+        }
+
+        boolean loggedIn = false;
+        if (user != null) {
+            loggedIn = true;
+        }
+
         try {
             Template temp = config.getTemplate("base.ftl");
 
             Map model = new HashMap();
             model.put("title", title);
             model.put("content", content);
+            model.put("loggedIn", loggedIn);
 
             StringWriter w = new StringWriter();
             temp.process(model, w);

@@ -40,7 +40,7 @@ public class LoginHandler  extends IHandler {
 
     private boolean handleGet(String message, Request request, Response response, Callback callback) {
         String content = Templater.renderTemplate("login.ftl", Map.of());
-        String fullPage = Templater.renderBaseTemplate("Login", content);
+        String fullPage = Templater.renderBaseTemplate(request, "Login", content);
         sendHtml(200, fullPage, response, callback);
         return true;
     }
@@ -72,7 +72,8 @@ public class LoginHandler  extends IHandler {
             Session s = request.getSession(true);
             s.setAttribute("user", user);
 
-            return handleGet("Logged in", request, response, callback);
+            Response.sendRedirect(request, response, callback, "/");
+            return true;
         }
 
         // if no fields refuse service

@@ -18,7 +18,7 @@ public class IndexHandler extends IHandler {
     @Override
     public boolean handle(Request request, Response response, Callback callback) {
         String content = Templater.renderTemplate("index.ftl", Map.of());
-        String fullPage = Templater.renderBaseTemplate("HydroWiki", content);
+        String fullPage = Templater.renderBaseTemplate(request,"HydroWiki", content);
         sendHtml(200, fullPage, response, callback);
         return true;
     }

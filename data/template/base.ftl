@@ -35,7 +35,11 @@
                         <a class="nav-link" href="/new/">New article</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/login/">Login</a>
+                        <#if loggedIn>
+                            <a class="nav-link" href="/login?action=logout">Logout</a>
+                        <#else>
+                            <a class="nav-link" href="/login/">Login</a>
+                        </#if>
                     </li>
                 </ul>
                 <form class="d-flex col-auto" role="search" action="/s">

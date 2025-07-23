@@ -35,7 +35,7 @@ public class AllArticlesHandler extends IHandler {
         });
 
         String content = Templater.renderTemplate("all_articles.ftl", Map.of("articles", articles));
-        String fullPage = Templater.renderBaseTemplate("All articles", content);
+        String fullPage = Templater.renderBaseTemplate(request, "All articles", content);
         sendHtml(200, fullPage, response, callback);
         return true;
     }

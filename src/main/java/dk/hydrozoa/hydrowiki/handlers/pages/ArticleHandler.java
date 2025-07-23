@@ -79,7 +79,7 @@ public class ArticleHandler extends IHandler {
                 );
 
                 String content = Templater.renderTemplate("article/article_edit.ftl", model);
-                String fullPage = Templater.renderBaseTemplate(articleName, content);
+                String fullPage = Templater.renderBaseTemplate(request, articleName, content);
                 sendHtml(200, fullPage, response, callback);
                 return true;
             }
@@ -99,7 +99,7 @@ public class ArticleHandler extends IHandler {
                 );
 
                 String content = Templater.renderTemplate("article/article_history.ftl", model);
-                String fullPage = Templater.renderBaseTemplate(articleName, content);
+                String fullPage = Templater.renderBaseTemplate(request, articleName, content);
                 sendHtml(200, fullPage, response, callback);
                 return true;
             }
@@ -162,7 +162,7 @@ public class ArticleHandler extends IHandler {
                 );
 
                 String content = Templater.renderTemplate("article/article_diff.ftl", model);
-                String fullPage = Templater.renderBaseTemplate(articleName, content);
+                String fullPage = Templater.renderBaseTemplate(request, articleName, content);
                 sendHtml(200, fullPage, response, callback);
                 return true;
             }
@@ -176,7 +176,7 @@ public class ArticleHandler extends IHandler {
         );
 
         String content = Templater.renderTemplate("article/article.ftl", model);
-        String fullPage = Templater.renderBaseTemplate(articleName, content);
+        String fullPage = Templater.renderBaseTemplate(request, articleName, content);
         sendHtml(200, fullPage, response, callback);
         return true;
     }
