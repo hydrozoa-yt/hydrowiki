@@ -66,7 +66,7 @@ public class WikiServer implements Runnable, ServerContext {
         mapHandler.addMapping(PathSpec.from("/files/*"), initializePublicFileResource(server));
         mapHandler.addMapping(PathSpec.from("/login/"), new LoginHandler(this));
         mapHandler.addMapping(PathSpec.from("/w/*"), new ArticleHandler(this));
-        mapHandler.addMapping(PathSpec.from("/new/"), new NewArticleHandler(this));
+        mapHandler.addMapping(PathSpec.from("/new"), new NewArticleHandler(this));
         mapHandler.addMapping(PathSpec.from("/random/"), new RandomArticleHandler(this));
         mapHandler.addMapping(PathSpec.from("/recent-changes/"), new RecentChangesHandler(this));
         mapHandler.addMapping(PathSpec.from("/all/"), new AllArticlesHandler(this));

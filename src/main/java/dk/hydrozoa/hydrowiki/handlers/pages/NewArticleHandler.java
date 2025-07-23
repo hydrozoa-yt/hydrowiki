@@ -34,6 +34,7 @@ public class NewArticleHandler extends IHandler {
         };
     }
 
+    // todo handle ?title=new_article_title to preset the name of the article
     private boolean handleGet(Request request, Response response, Callback callback) {
         Map model = Map.of();
         String content = Templater.renderTemplate("new_article.ftl", model);

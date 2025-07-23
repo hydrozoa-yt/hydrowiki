@@ -65,7 +65,7 @@ public class ArticleHandler extends IHandler {
         }
 
         if (article == null) {
-            return false;
+            return sendNoArticleFound(articleName, request, response, callback);
         }
 
         Fields fields = Request.extractQueryParameters(request);
@@ -190,6 +190,19 @@ public class ArticleHandler extends IHandler {
         );
 
         String content = Templater.renderTemplate("article/article.ftl", model);
+        String fullPage = Templater.renderBaseTemplate(request, articleName, content);
+        sendHtml(200, fullPage, response, callback);
+        return true;
+    }
+
+    private boolean sendNoArticleFound(String articleName, Request request, Response response, Callback callback) {
+        boolean isLoggedIn = getLoggedIn(request) != null;
+        Map model = Map.of(
+                "isLoggedIn", isLoggedIn,
+                "articleName", articleName,
+                "articleNameHumanReadable", articleName
+        );
+        String content = Templater.renderTemplate("article/article_none_found.ftl", model);
         String fullPage = Templater.renderBaseTemplate(request, articleName, content);
         sendHtml(200, fullPage, response, callback);
         return true;
