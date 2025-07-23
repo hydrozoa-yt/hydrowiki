@@ -2,13 +2,18 @@ package dk.hydrozoa.hydrowiki.handlers.pages;
 
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
+import dk.hydrozoa.hydrowiki.database.Counter;
+import dk.hydrozoa.hydrowiki.database.DbUsers;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import org.eclipse.jetty.server.FormFields;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.Session;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.Fields;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 public class LoginHandler  extends IHandler {
@@ -44,13 +49,33 @@ public class LoginHandler  extends IHandler {
         Fields fields = FormFields.getFields(request);
 
         if (fields != null) {
-            String email = fields.getValue("emailInput");
+            String username = fields.getValue("usernameInput");
             String password = fields.getValue("passwordInput");
 
-            System.out.println("email: "+email+" \t password: "+password);
-            // todo handle
+            DbUsers.RUser user = null;
+            try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                user = DbUsers.getUser(username, con, new Counter());
+                System.out.println("username: " + username + " \t password: " + password);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (user == null) {
+                return handleGet("Login unsuccessful", request, response, callback);
+            }
+
+            if (!user.password().equals(password)) {
+                return handleGet("Login unsuccessful", request, response, callback);
+            }
+
+            // attach copy of user object to session
+            Session s = request.getSession(true);
+            s.setAttribute("user", user);
+
+            return handleGet("Logged in", request, response, callback);
         }
 
-        return handleGet("Logged in", request, response, callback);
+        // if no fields refuse service
+        return false;
     }
 }

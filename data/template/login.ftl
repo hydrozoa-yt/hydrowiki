@@ -3,12 +3,12 @@
     <form method="post" style="width: 22rem;">
         <h1 class="mb-5">Login</h1>
         <div class="mb-3">
-            <label for="emailInput" class="form-label">Email</label>
+            <label for="usernameInput" class="form-label">Username</label>
             <input
                 type="text"
-                name="emailInput"
-                id="emailInput"
-                placeholder="Enter your email"
+                name="usernameInput"
+                id="usernameInput"
+                placeholder="Enter your username"
                 class="form-control"
                 required
             >

@@ -96,6 +96,9 @@ public class WikiServer implements Runnable, ServerContext {
         sesIdMan.setSessionHouseKeeper(houseKeeper);
 
         SessionHandler sesMan = new SessionHandler();
+        sesMan.setUsingCookies(true);
+        sesMan.setSessionCookie("hydrowiki_cookie");
+        sesMan.setSessionPath("/");
 
         SessionCache sesCache = new DefaultSessionCache(sesMan);
         sesCache.setEvictionPolicy(60 * 60 * 24);

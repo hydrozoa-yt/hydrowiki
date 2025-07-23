@@ -38,8 +38,8 @@
                         <a class="nav-link" href="/login/">Login</a>
                     </li>
                 </ul>
-                <form class="d-flex" role="search">
-                    <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                <form class="d-flex col-auto" role="search" action="/s">
+                    <input class="form-control" type="search" name="terms" placeholder="Search" aria-label="Search">
                 </form>
             </div>
         </div>
