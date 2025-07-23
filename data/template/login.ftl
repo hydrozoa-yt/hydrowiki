@@ -6,6 +6,7 @@
             <label for="emailInput" class="form-label">Email</label>
             <input
                 type="text"
+                name="emailInput"
                 id="emailInput"
                 placeholder="Enter your email"
                 class="form-control"
@@ -17,6 +18,7 @@
             <label for="passwordInput" class="form-label">Password</label>
             <input
                 type=password
+                name="passwordInput"
                 id="passwordInput"
                 placeholder="Enter your password"
                 class="form-control"

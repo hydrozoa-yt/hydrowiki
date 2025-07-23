@@ -2,15 +2,13 @@ package dk.hydrozoa.hydrowiki.handlers.pages;
 
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
-import dk.hydrozoa.hydrowiki.Util;
-import dk.hydrozoa.hydrowiki.database.DbArticles;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
+import org.eclipse.jetty.server.FormFields;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.Fields;
 
-import java.sql.Connection;
 import java.util.Map;
 
 public class LoginHandler  extends IHandler {
@@ -43,19 +41,16 @@ public class LoginHandler  extends IHandler {
     }
 
     private boolean handlePost(Request request, Response response, Callback callback) {
-        try {
-            Fields fields = Request.getParameters(request);
-            if (fields != null) {
-                String email = fields.getValue("emailInput");
-                String password = fields.getValue("passwordInput");
+        Fields fields = FormFields.getFields(request);
 
-                System.out.println("email: "+email+" \t password: "+password);
-                // todo handle
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (fields != null) {
+            String email = fields.getValue("emailInput");
+            String password = fields.getValue("passwordInput");
+
+            System.out.println("email: "+email+" \t password: "+password);
+            // todo handle
         }
 
-        return false;
+        return handleGet("Logged in", request, response, callback);
     }
 }

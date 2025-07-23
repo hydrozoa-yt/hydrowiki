@@ -59,27 +59,7 @@ public class WikiServer implements Runnable, ServerContext {
         // Make a handler that delegates to handlers based on path
         PathMappingsHandler mapHandler = new PathMappingsHandler();
 
-        ResourceFactory resourceFactory = ResourceFactory.of(server);
-
-        // Create and configure a ResourceHandler.
-        Resource publicResource = resourceFactory.newResource(Path.of("data/public/"));
-        if (!Resources.isReadableDirectory(publicResource)) {
-            throw new RuntimeException("Resource is not a readable directory");
-        }
-        ResourceHandler publicFilesHandler = new ResourceHandler();
-        publicFilesHandler.setBaseResource(publicResource);
-        publicFilesHandler.setUseFileMapping(true);
-        publicFilesHandler.setDirAllowed(false);
-
-        MimeTypes.Mutable types = new MimeTypes.Mutable();
-        types.addMimeMapping("js", "text/javascript; charset=utf-8");
-        types.addMimeMapping("css", "text/css; charset=utf-8");
-        types.addMimeMapping("svg", "image/svg+xml");
-        publicFilesHandler.setMimeTypes(types);
-
-        StripContextPathWrapper stripResHandler = new StripContextPathWrapper("/files", publicFilesHandler);
-
-        mapHandler.addMapping(PathSpec.from("/files/*"), stripResHandler);
+        mapHandler.addMapping(PathSpec.from("/files/*"), initializePublicFileResource(server));
         mapHandler.addMapping(PathSpec.from("/login/"), new LoginHandler(this));
         mapHandler.addMapping(PathSpec.from("/w/*"), new ArticleHandler(this));
         mapHandler.addMapping(PathSpec.from("/new/"), new NewArticleHandler(this));
@@ -101,6 +81,29 @@ public class WikiServer implements Runnable, ServerContext {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Handler.Wrapper initializePublicFileResource(Server server) {
+        ResourceFactory resourceFactory = ResourceFactory.of(server);
+
+        // Create and configure a ResourceHandler.
+        Resource publicResource = resourceFactory.newResource(Path.of("data/public/"));
+        if (!Resources.isReadableDirectory(publicResource)) {
+            throw new RuntimeException("Resource is not a readable directory");
+        }
+        ResourceHandler publicFilesHandler = new ResourceHandler();
+        publicFilesHandler.setBaseResource(publicResource);
+        publicFilesHandler.setUseFileMapping(true);
+        publicFilesHandler.setDirAllowed(false);
+
+        MimeTypes.Mutable types = new MimeTypes.Mutable();
+        types.addMimeMapping("js", "text/javascript; charset=utf-8");
+        types.addMimeMapping("css", "text/css; charset=utf-8");
+        types.addMimeMapping("svg", "image/svg+xml");
+        publicFilesHandler.setMimeTypes(types);
+
+        StripContextPathWrapper stripResHandler = new StripContextPathWrapper("/files", publicFilesHandler);
+        return stripResHandler;
     }
 
     /**
