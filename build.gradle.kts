@@ -2,7 +2,13 @@ import de.undercouch.gradle.tasks.download.Download
 
 plugins {
     id("java")
+    id("application")
     id("de.undercouch.download").version("5.6.0")
+    id("com.github.johnrengelman.shadow").version("8.1.1")
+}
+
+application {
+    mainClass.set("dk.hydrozoa.hydrowiki.Main")
 }
 
 group = "dk.hydrozoa"
