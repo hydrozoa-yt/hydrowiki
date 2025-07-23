@@ -30,5 +30,6 @@ Run `dk.hydrozoa.hydrowiki.Main`.
 
 ## Future development
 The following features are planned:
-* Users and logging in
 * Uploadable images by users
+* Generative reference tables
+* Red links for missing articles
