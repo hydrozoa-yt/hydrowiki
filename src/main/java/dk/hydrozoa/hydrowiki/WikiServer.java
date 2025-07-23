@@ -7,6 +7,7 @@ import org.eclipse.jetty.http.pathmap.PathSpec;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.PathMappingsHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.session.*;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.resource.Resources;
@@ -49,6 +50,8 @@ public class WikiServer implements Runnable, ServerContext {
         // Create a Server instance.
         Server server = new Server(threadPool);
 
+        SessionHandler sessionHandler = initializeSessions(server);
+
         // Create a ServerConnector to accept connections from clients.
         ServerConnector connector = new ServerConnector(server);
         connector.setPort(Integer.parseInt(config.getProperty("app.port")));
@@ -58,6 +61,7 @@ public class WikiServer implements Runnable, ServerContext {
 
         // Make a handler that delegates to handlers based on path
         PathMappingsHandler mapHandler = new PathMappingsHandler();
+        sessionHandler.setHandler(mapHandler);
 
         mapHandler.addMapping(PathSpec.from("/files/*"), initializePublicFileResource(server));
         mapHandler.addMapping(PathSpec.from("/login/"), new LoginHandler(this));
@@ -69,7 +73,7 @@ public class WikiServer implements Runnable, ServerContext {
         mapHandler.addMapping(PathSpec.from("/"), new IndexHandler(this));
 
         // Set a simple Handler to handle requests/responses.
-        server.setHandler(mapHandler);
+        server.setHandler(sessionHandler);
 
         // logging per request
         server.setRequestLog(new CustomRequestLog(new Slf4jRequestLogWriter(), CustomRequestLog.NCSA_FORMAT));
@@ -81,6 +85,26 @@ public class WikiServer implements Runnable, ServerContext {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private SessionHandler initializeSessions(Server server) {
+        SessionIdManager sesIdMan = new DefaultSessionIdManager(server);
+        server.addBean(sesIdMan, true);
+
+        HouseKeeper houseKeeper = new HouseKeeper();
+        houseKeeper.setSessionIdManager(sesIdMan);
+        sesIdMan.setSessionHouseKeeper(houseKeeper);
+
+        SessionHandler sesMan = new SessionHandler();
+
+        SessionCache sesCache = new DefaultSessionCache(sesMan);
+        sesCache.setEvictionPolicy(60 * 60 * 24);
+        SessionDataStore dataStore = new NullSessionDataStore();
+
+        sesCache.setSessionDataStore(dataStore);
+        sesMan.setSessionCache(sesCache);
+
+        return sesMan;
     }
 
     private Handler.Wrapper initializePublicFileResource(Server server) {

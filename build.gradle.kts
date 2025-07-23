@@ -13,7 +13,8 @@ repositories {
 }
 
 dependencies {
-    implementation("org.eclipse.jetty:jetty-server:12.0.22")
+    implementation("org.eclipse.jetty:jetty-server:12.0.23")
+    implementation("org.eclipse.jetty:jetty-session:12.0.23")
     implementation("org.slf4j:slf4j-simple:2.0.17")
     implementation("org.freemarker:freemarker:2.3.34")
     implementation("com.google.guava:guava:33.4.8-jre")
