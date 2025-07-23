@@ -33,8 +33,8 @@
                     </li>
                     <#if loggedIn>
                         <li class="nav-item">
-                        <a class="nav-link" href="/new/">New article</a>
-                    </li>
+                            <a class="nav-link" href="/new/">New article</a>
+                        </li>
                     </#if>
                     <li class="nav-item">
                         <#if loggedIn>
@@ -61,7 +61,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 mb-3 mb-md-0">
-                    <p class="mb-0">&copy; 2025 HydroWiki. Powered by &#10084;&#65039;.</p>
+                    <p class="text-secondary mb-0">Powered by HydroWiki</p>
                 </div>
                 <div class="col-md-6">
                     <ul class="list-inline mb-0">
