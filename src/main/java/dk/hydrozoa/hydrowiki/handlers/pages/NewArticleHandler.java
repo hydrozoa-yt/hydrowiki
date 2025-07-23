@@ -2,7 +2,9 @@ package dk.hydrozoa.hydrowiki.handlers.pages;
 
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
+import dk.hydrozoa.hydrowiki.Util;
 import dk.hydrozoa.hydrowiki.database.DbArticles;
+import dk.hydrozoa.hydrowiki.database.DbUsers;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
@@ -21,6 +23,11 @@ public class NewArticleHandler extends IHandler {
 
     @Override
     public boolean handle(Request request, Response response, Callback callback) {
+        // not logged in, refuse service
+        if (getLoggedIn(request) == null) {
+            return false;
+        }
+
         return switch (request.getMethod()) {
             case "POST" -> handlePost(request, response, callback);
             default -> handleGet(request, response, callback);
@@ -36,6 +43,8 @@ public class NewArticleHandler extends IHandler {
     }
 
     private boolean handlePost(Request request, Response response, Callback callback) {
+        DbUsers.RUser user = getLoggedIn(request);
+
         String articleTitle = null;
         String articleContent = null;
         try {
@@ -51,6 +60,10 @@ public class NewArticleHandler extends IHandler {
 
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
             int id = DbArticles.insertArticle(articleTitle, articleContent, con, getDatabaseLookupCounter());
+
+            String diffToPrevious = Util.generateDiffs(articleTitle, articleContent, "");
+            DbArticles.insertArticleEdit(user.id(), id, diffToPrevious, con, getDatabaseLookupCounter());
+
             if (id != -1) {
                 Response.sendRedirect(request, response, callback, "/w/"+articleTitle);
                 return true;

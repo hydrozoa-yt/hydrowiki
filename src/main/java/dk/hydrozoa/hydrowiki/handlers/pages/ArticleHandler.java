@@ -9,6 +9,7 @@ import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
 import dk.hydrozoa.hydrowiki.Util;
 import dk.hydrozoa.hydrowiki.database.DbArticles;
+import dk.hydrozoa.hydrowiki.database.DbUsers;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import dk.hydrozoa.hydrowiki.ui.WikiTextParser;
 import org.eclipse.jetty.server.Request;
@@ -182,6 +183,11 @@ public class ArticleHandler extends IHandler {
     }
 
     private boolean handlePost(String[] pathTokens, Request request, Response response, Callback callback) {
+        DbUsers.RUser user = getLoggedIn(request);
+        if (user == null) {
+            return false;
+        }
+
         // find relevant article from url
         String articleName = pathTokens[1];
 
@@ -205,7 +211,7 @@ public class ArticleHandler extends IHandler {
                     try (Connection con = getContext().getDBConnectionPool().getConnection()) {
                         DbArticles.updateArticleContent(article.id(), newContent, con, getDatabaseLookupCounter());
                         String diffToPrevious = Util.generateDiffs(article.title(), newContent, article.content());
-                        DbArticles.insertArticleEdit(article.id(), diffToPrevious, con, getDatabaseLookupCounter());
+                        DbArticles.insertArticleEdit(user.id(), article.id(), diffToPrevious, con, getDatabaseLookupCounter());
                     }
 
                     String info = "Saved new version successfully";

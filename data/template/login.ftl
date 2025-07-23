@@ -1,6 +1,14 @@
 <div class="w-100 d-flex justify-content-center">
 
     <form method="post" style="width: 22rem;">
+
+        <#if infoMessage?? && infoMessage?has_content>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ${infoMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </#if>
+
         <h1 class="mb-5">Login</h1>
         <div class="mb-3">
             <label for="usernameInput" class="form-label">Username</label>

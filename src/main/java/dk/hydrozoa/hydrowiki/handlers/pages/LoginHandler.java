@@ -18,16 +18,19 @@ import java.util.Map;
 
 public class LoginHandler  extends IHandler {
 
+    private String FAILED_LOGIN_TEXT = "Incorrect username and/or password.";
+
     public LoginHandler(ServerContext ctx) {
         super(ctx);
     }
 
     @Override
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
-        /*if (pathTokens.length < 2) {
+        DbUsers.RUser user = getLoggedIn(request);
+        if (user != null) {
             Response.sendRedirect(request, response, callback, "/");
             return true;
-        }*/
+        }
 
         switch (request.getMethod()) {
             case "POST":
@@ -39,7 +42,7 @@ public class LoginHandler  extends IHandler {
     }
 
     private boolean handleGet(String message, Request request, Response response, Callback callback) {
-        String content = Templater.renderTemplate("login.ftl", Map.of());
+        String content = Templater.renderTemplate("login.ftl", Map.of("infoMessage", message));
         String fullPage = Templater.renderBaseTemplate(request, "Login", content);
         sendHtml(200, fullPage, response, callback);
         return true;
@@ -61,11 +64,11 @@ public class LoginHandler  extends IHandler {
             }
 
             if (user == null) {
-                return handleGet("Login unsuccessful", request, response, callback);
+                return handleGet(FAILED_LOGIN_TEXT, request, response, callback);
             }
 
             if (!user.password().equals(password)) {
-                return handleGet("Login unsuccessful", request, response, callback);
+                return handleGet(FAILED_LOGIN_TEXT, request, response, callback);
             }
 
             // attach copy of user object to session

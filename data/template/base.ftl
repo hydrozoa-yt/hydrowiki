@@ -31,9 +31,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/random/">Random page</a>
                     </li>
-                    <li class="nav-item">
+                    <#if loggedIn>
+                        <li class="nav-item">
                         <a class="nav-link" href="/new/">New article</a>
                     </li>
+                    </#if>
                     <li class="nav-item">
                         <#if loggedIn>
                             <a class="nav-link" href="/login?action=logout">Logout</a>

@@ -230,14 +230,14 @@ public class DbArticles {
         return -1;
     }
 
-    public static int insertArticleEdit(int articleId, String diff, Connection con, Counter counter) {
+    public static int insertArticleEdit(int userId, int articleId, String diff, Connection con, Counter counter) {
         counter.increment();
         String query = """
             INSERT INTO article_edits (article_id, version, user_id, unified_diff_to_prev)
             SELECT
                 ? AS article_id,
                 COALESCE(MAX(ae.version), 0) + 1 AS version,
-                -1 AS user_id,
+                ? AS user_id,
                 ? AS unified_diff_to_prev
             FROM
                 article_edits AS ae
@@ -247,8 +247,9 @@ public class DbArticles {
 
         try (PreparedStatement pstmt = con.prepareStatement(query)) {
             pstmt.setInt(1, articleId);
-            pstmt.setString(2, diff);
-            pstmt.setInt(3, articleId);
+            pstmt.setInt(2, userId);
+            pstmt.setString(3, diff);
+            pstmt.setInt(4, articleId);
             pstmt.executeQuery();
 
             try (ResultSet rs = con.prepareStatement("SELECT LAST_INSERT_ID()").executeQuery()) {
