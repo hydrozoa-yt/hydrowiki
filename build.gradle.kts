@@ -12,7 +12,7 @@ application {
 }
 
 group = "dk.hydrozoa"
-version = "1.0-SNAPSHOT"
+version = "0.1"
 
 repositories {
     mavenCentral()
@@ -59,5 +59,66 @@ tasks.register<Download>("downloadBootstrap") {
 
     doFirst {
         destinationDirectory.mkdirs()
+    }
+}
+
+// New task to compile disstribution of the application
+tasks.register("distributeApp") {
+    description = "Prepares the application for distribution by copying necessary files."
+
+    // This task depends on the 'shadowJar' task to ensure the fat JAR is built first.
+    dependsOn(tasks.shadowJar)
+
+    doLast {
+        // Define the distribution directory
+        val distDir = projectDir.resolve("dis")
+        distDir.mkdirs() // Ensure the 'dis' directory exists
+
+        // Define source and destination directories for data and templates
+        val publicDir = projectDir.resolve("data/public")
+        val publicDestDir = distDir.resolve("data/public")
+        val templateSourceDir = projectDir.resolve("data/template")
+        val templateDestDir = distDir.resolve("data/template")
+
+        // Delete existing public and template directories in 'dis' if they exist
+        if (publicDestDir.exists()) {
+            println("Deleting existing directory: ${publicDestDir.absolutePath}")
+            publicDestDir.deleteRecursively()
+        }
+        if (templateDestDir.exists()) {
+            println("Deleting existing directory: ${templateDestDir.absolutePath}")
+            templateDestDir.deleteRecursively()
+        }
+
+        // Copy 'data/public' to 'dis/data/public'
+        if (publicDir.exists()) {
+            println("Copying ${publicDir.absolutePath} to ${publicDestDir.absolutePath}")
+            publicDir.copyRecursively(publicDestDir, overwrite = true)
+        } else {
+            println("Warning: Source directory not found: ${publicDir.absolutePath}")
+        }
+
+        // Copy 'data/template' to 'dis/data/template'
+        if (templateSourceDir.exists()) {
+            println("Copying ${templateSourceDir.absolutePath} to ${templateDestDir.absolutePath}")
+            templateSourceDir.copyRecursively(templateDestDir, overwrite = true)
+        } else {
+            println("Warning: Source directory not found: ${templateSourceDir.absolutePath}")
+        }
+
+        // Copy the generated JAR to 'dis'
+        val jarFile = tasks.shadowJar.get().archiveFile.get().asFile
+        //val destJarFile = distDir.resolve(jarFile.name)
+        val destJarFile = distDir.resolve("hydrowiki.jar")
+        if (jarFile.exists()) {
+            println("Copying ${jarFile.absolutePath} to ${destJarFile.absolutePath}")
+            jarFile.copyTo(destJarFile, overwrite = true)
+        } else {
+            println("Error: JAR file not found at ${jarFile.absolutePath}. Please run 'gradle shadowJar' first.")
+        }
+
+        val versionFile = distDir.resolve("version.txt")
+        versionFile.writeText(project.version.toString())
+        println("Created version file: ${versionFile.absolutePath} with content: ${project.version}")
     }
 }
