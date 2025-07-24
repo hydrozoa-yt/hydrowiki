@@ -64,7 +64,7 @@ public class MediaHandler extends IHandler {
         // todo check if logged in
         String contentType = request.getHeaders().get("Content-Type");
         MultiPartConfig config = new MultiPartConfig.Builder()
-                .location(Path.of("temp/"))
+                .location(Path.of("/tmp/"))
                 .maxPartSize(1024 * 1024) // max 1 MB
                 .build();
 
@@ -75,11 +75,12 @@ public class MediaHandler extends IHandler {
                     String filename = p.getFileName();
                     System.out.println("Received file: "+filename);
                 });
-                try {
-                    Files.deleteIfExists(Path.of("temp/"));
-                } catch (IOException e) {
-                    logger.error("Could not delete temp/");
-                }
+                //try {
+                    // todo will fuck up any other uploads happening simultaneously, rather go for /tmp/ instead
+                    //Files.deleteIfExists(Path.of("temp/"));
+                //} catch (IOException e) {
+                //    logger.error("Could not delete temp/");
+                //}
             }
 
             @Override
