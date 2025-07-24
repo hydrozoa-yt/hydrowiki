@@ -44,3 +44,5 @@ The following features are planned:
 * Generative reference tables
 * Red links for missing articles
 * Wikitext support for external links and lists 
+* Page last edited on all articles
+* Debug info containing nanos to render the page and number of database lookups
