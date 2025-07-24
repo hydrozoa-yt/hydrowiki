@@ -9,4 +9,6 @@ public interface ServerContext {
 
     public DataSource getDBConnectionPool();
 
+    public S3Interactor getS3Interactor();
+
 }

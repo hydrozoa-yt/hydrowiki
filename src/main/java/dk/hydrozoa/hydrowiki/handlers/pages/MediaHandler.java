@@ -67,6 +67,7 @@ public class MediaHandler extends IHandler {
                 .location(Path.of("temp/"))
                 .maxPartSize(1024 * 1024) // max 1 MB
                 .build();
+
         MultiPartFormData.onParts(request, request, contentType, config, new Promise.Invocable<>() {
             @Override
             public void succeeded(MultiPartFormData.Parts parts) {
@@ -87,6 +88,6 @@ public class MediaHandler extends IHandler {
             }
         });
 
-        return handleGet(new InfoMessage.Message(InfoMessage.TYPE.WARNING, "Probabæy didnt receive image"), request, response, callback);
+        return handleGet(new InfoMessage.Message(InfoMessage.TYPE.WARNING, "Probably didnt receive image"), request, response, callback);
     }
 }

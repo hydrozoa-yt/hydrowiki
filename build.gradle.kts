@@ -26,6 +26,8 @@ dependencies {
     implementation("com.google.guava:guava:33.4.8-jre")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
     implementation("io.github.java-diff-utils:java-diff-utils:4.15")
+    implementation("software.amazon.awssdk:s3:2.32.6")
+    implementation("software.amazon.awssdk:protocol-core:2.32.6")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

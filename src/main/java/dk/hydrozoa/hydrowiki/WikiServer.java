@@ -29,6 +29,7 @@ public class WikiServer implements Runnable, ServerContext {
 
     private DataSource dbConnectionPool;
     private Properties config;
+    private S3Interactor cloudDrive;
 
     public void run() {
         // Load properties
@@ -42,6 +43,9 @@ public class WikiServer implements Runnable, ServerContext {
 
         logger.info("Initializing database...");
         dbConnectionPool = initializeDbConnectionPool(config);
+
+        logger.info("Initializing cloud drive...");
+        cloudDrive = new S3Interactor(config);
 
         // Create and configure a ThreadPool.
         QueuedThreadPool threadPool = new QueuedThreadPool();
@@ -163,5 +167,10 @@ public class WikiServer implements Runnable, ServerContext {
     @Override
     public DataSource getDBConnectionPool() {
         return dbConnectionPool;
+    }
+
+    @Override
+    public S3Interactor getS3Interactor() {
+        return cloudDrive;
     }
 }

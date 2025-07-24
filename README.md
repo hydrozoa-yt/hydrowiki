@@ -34,10 +34,13 @@ Configuration is done in `data/config.properties`, make sure you have the correc
 ### 4) Running HydroWiki remotely
 1. Run the gradle task `distributeApp`. This will pack all needed files to run into `dis/`. Make sure to copy `data/config.properties` to `dis/data/config.properties`.
 2. Copy `dis/` to somewhere on your server, for example `/var/www/hydrowiki/` on linux.
-3. Run the hydrowiki jar (for example `/var/www/hydrowiki/hydrowiki.jar`) on your server, or create a systemd task that starts it
+3. Run the hydrowiki jar on your server by running `java -jar hydrowiki.jar`, or create a systemd task that starts it
 
 ## Future development
-The following features are planned:
+The following features are in development:
 * Uploadable images by users
+
+The following features are planned:
 * Generative reference tables
 * Red links for missing articles
+* Wikitext support for external links and lists 
