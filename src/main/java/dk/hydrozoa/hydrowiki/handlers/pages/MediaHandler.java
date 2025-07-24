@@ -2,13 +2,25 @@ package dk.hydrozoa.hydrowiki.handlers.pages;
 
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
+import dk.hydrozoa.hydrowiki.WikiServer;
 import dk.hydrozoa.hydrowiki.database.DbUsers;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import dk.hydrozoa.hydrowiki.model.InfoMessage;
+import org.eclipse.jetty.http.MultiPart;
+import org.eclipse.jetty.http.MultiPartConfig;
+import org.eclipse.jetty.http.MultiPartFormData;
+import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.Fields;
+import org.eclipse.jetty.util.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -17,6 +29,8 @@ import java.util.Map;
  * nginx or similar without invoking the app.
  */
 public class MediaHandler extends IHandler {
+
+    final Logger logger = LoggerFactory.getLogger(MediaHandler.class);
 
     public MediaHandler(ServerContext ctx) {
         super(ctx);
@@ -47,6 +61,32 @@ public class MediaHandler extends IHandler {
     }
 
     private boolean handlePost(Request request, Response response, Callback callback) {
-        return false;
+        // todo check if logged in
+        String contentType = request.getHeaders().get("Content-Type");
+        MultiPartConfig config = new MultiPartConfig.Builder()
+                .location(Path.of("temp/"))
+                .maxPartSize(1024 * 1024) // max 1 MB
+                .build();
+        MultiPartFormData.onParts(request, request, contentType, config, new Promise.Invocable<>() {
+            @Override
+            public void succeeded(MultiPartFormData.Parts parts) {
+                parts.forEach(p -> {
+                    String filename = p.getFileName();
+                    System.out.println("Received file: "+filename);
+                });
+                try {
+                    Files.deleteIfExists(Path.of("temp/"));
+                } catch (IOException e) {
+                    logger.error("Could not delete temp/");
+                }
+            }
+
+            @Override
+            public void failed(Throwable x) {
+                x.printStackTrace();
+            }
+        });
+
+        return handleGet(new InfoMessage.Message(InfoMessage.TYPE.WARNING, "Probabæy didnt receive image"), request, response, callback);
     }
 }
