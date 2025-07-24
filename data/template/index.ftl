@@ -3,5 +3,5 @@
     <p>This is a bare-bones wiki software.</p>
     <p>Enjoy your stay.</p>
     <h2>Discover...</h2>
-    <a href="/media/">Media</a>
+    <a href="/media/" class="link-secondary link-offset-2">Media</a>
 </div>

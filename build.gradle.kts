@@ -25,8 +25,6 @@ dependencies {
     implementation("org.freemarker:freemarker:2.3.34")
     implementation("com.google.guava:guava:33.4.8-jre")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
-    implementation("com.vladsch.flexmark:flexmark-all:0.64.8") // todo decide for flexmark or asciidoctor, lol I guess it's neither
-    implementation("org.asciidoctor:asciidoctorj:3.0.0")
     implementation("io.github.java-diff-utils:java-diff-utils:4.15")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -108,7 +106,6 @@ tasks.register("distributeApp") {
 
         // Copy the generated JAR to 'dis'
         val jarFile = tasks.shadowJar.get().archiveFile.get().asFile
-        //val destJarFile = distDir.resolve(jarFile.name)
         val destJarFile = distDir.resolve("hydrowiki.jar")
         if (jarFile.exists()) {
             println("Copying ${jarFile.absolutePath} to ${destJarFile.absolutePath}")
