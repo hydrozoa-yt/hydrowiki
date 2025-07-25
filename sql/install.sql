@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS `article_edits` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO `users` (`username`, `email`, `password`) VALUES
-('admin_user', 'admin@example.com', 'password'),
-('test_user', 'test@example.com', 'password');
+INSERT INTO `users` (`username`, `email`, `password`, `rights`) VALUES
+('admin_user', 'admin@example.com', 'password', 1),
+('test_user', 'test@example.com', 'password', 0);
 
 INSERT INTO `articles` (`title`, `content`) VALUES
 ('Invasion_of_the_heymen', 'This is an article describing the historical event "Invasion of the heymen", and it explains the happenings as well as the historical significance of the event.'),
