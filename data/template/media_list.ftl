@@ -26,7 +26,9 @@
         <div class="row">
             <#list medias as media>
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <img src="${media}" class="img-fluid rounded shadow-sm" alt="Placeholder image">
+                    <a href="/w/media:${media.filename}">
+                        <img src="${media.url}" class="img-fluid rounded shadow-sm">
+                    </a>
                 </div>
             </#list>
             <div class="col-lg-4 col-md-6 mb-4">

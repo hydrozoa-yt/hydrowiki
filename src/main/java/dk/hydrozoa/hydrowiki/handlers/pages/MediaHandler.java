@@ -69,9 +69,12 @@ public class MediaHandler extends IHandler {
             throw new RuntimeException(e);
         }
 
-        List<String> mediaModel = new ArrayList<>();
+        List<Map> mediaModel = new ArrayList<>();
         allMedia.forEach(i -> {
-            mediaModel.add(S3_URL+"/"+i.filename());
+            Map model = Map.of("filename", i.filename(),
+                    "url", S3_URL+"/"+i.filename()
+            );
+            mediaModel.add(model);
         });
 
         Map model = Map.of(
