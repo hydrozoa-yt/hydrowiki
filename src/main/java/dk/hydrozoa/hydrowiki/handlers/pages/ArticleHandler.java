@@ -8,7 +8,9 @@ import com.github.difflib.text.DiffRowGenerator;
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
 import dk.hydrozoa.hydrowiki.Util;
+import dk.hydrozoa.hydrowiki.database.Counter;
 import dk.hydrozoa.hydrowiki.database.DbArticles;
+import dk.hydrozoa.hydrowiki.database.DbMedia;
 import dk.hydrozoa.hydrowiki.database.DbUsers;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import dk.hydrozoa.hydrowiki.ui.WikiTextParser;
@@ -29,9 +31,12 @@ public class ArticleHandler extends IHandler {
 
     private WikiTextParser parser;
 
+    private String S3_URL;
+
     public ArticleHandler(ServerContext ctx) {
         super(ctx);
         parser = new WikiTextParser();
+        S3_URL = ctx.getProperties().getProperty("s3.public_access");
     }
 
     @Override
@@ -55,7 +60,33 @@ public class ArticleHandler extends IHandler {
     }
 
     private boolean handleGet(String infoMessage, String[] pathTokens, Request request, Response response, Callback callback) {
+        DbUsers.RUser loggedIn = getLoggedIn(request);
+
         String articleName = pathTokens[1];
+
+        if (articleName.startsWith("media:")) { // display media version of article
+            DbMedia.RMedia media;
+            String authorUsername;
+            try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                media = DbMedia.getMedia(articleName.replace("media:", ""), con, new Counter());
+                authorUsername = DbUsers.getUser(media.id(), con, new Counter()).username();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            Map model = Map.of(
+                    "mediaUrl", S3_URL+"/"+media.filename(),
+                    "articleName", articleName,
+                    "loggedIn", loggedIn != null,
+                    "user", authorUsername,
+                    "creation", media.created().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            );
+
+            String content = Templater.renderTemplate("article/article_media.ftl", model);
+            String fullPage = Templater.renderBaseTemplate(request, articleName, content);
+            sendHtml(200, fullPage, response, callback);
+            return true;
+        }
 
         DbArticles.RArticle article = null;
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
