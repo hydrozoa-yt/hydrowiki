@@ -38,7 +38,7 @@
                     </#if>
                     <li class="nav-item">
                         <#if loggedIn>
-                            <a class="nav-link" href="/login?action=logout">Logout</a>
+                            <a class="nav-link" href="/login/?action=logout">Logout</a>
                         <#else>
                             <a class="nav-link" href="/login/">Login</a>
                         </#if>

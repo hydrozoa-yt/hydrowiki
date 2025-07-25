@@ -6,7 +6,7 @@
     </div>
     <p>Maybe you want to author this article?</p>
     <#if isLoggedIn>
-        <a href="/new?title=${articleName}" class="btn btn-primary d-inline-flex align-items-center">
+        <a href="/new/?title=${articleName}" class="btn btn-primary d-inline-flex align-items-center">
             <i class="bi bi-plus-lg me-2"></i>
             Add article
         </a>
