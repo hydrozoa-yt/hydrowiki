@@ -24,6 +24,11 @@
     <div class="mt-5">
         <h2 class="mb-4">Gallery</h2>
         <div class="row">
+            <#list medias as media>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <img src="${media}" class="img-fluid rounded shadow-sm" alt="Placeholder image">
+                </div>
+            </#list>
             <div class="col-lg-4 col-md-6 mb-4">
                 <img src="https://placehold.co/600x400/EEE/31343C" class="img-fluid rounded shadow-sm" alt="Placeholder image">
             </div>
