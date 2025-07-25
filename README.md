@@ -26,6 +26,26 @@ Also change the settings in `data/config.properties` to connect to your database
 
 ### 2) Configuration
 Configuration is done in `data/config.properties`, make sure you have the correct info for your database.
+```
+app.url = 128.0.0.1
+app.port = 8080
+app.debug = true
+
+# Database
+db.address=128.0.0.1
+db.username=hydrowiki_user
+db.password=password
+db.database=hydrowiki_dev
+db.pool_size=16
+
+# Object storage for media
+s3.endpoint = https://example.cloud
+s3.region = nl-ams
+s3.bucket_name = example-bucket
+s3.access_key = a_access_key
+s3.secret_key = a_secret_key
+s3.public_access = https://example-bucket.example.cloud
+```
 
 ### 3) Running HydroWiki locally
 1. Run the gradle task `downloadBoostrap` at least once. This downloads bootstrap js and css.
