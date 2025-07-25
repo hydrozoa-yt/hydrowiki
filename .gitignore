@@ -43,3 +43,4 @@ bin/
 
 .idea/
 dis/
+data/config.properties
