@@ -39,7 +39,7 @@ public class MediaHandler extends IHandler {
     @Override
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
         DbUsers.RUser user = getLoggedIn(request);
-        if (user != null) {
+        if (user == null) {
             Response.sendRedirect(request, response, callback, "/");
             return true;
         }
@@ -54,41 +54,39 @@ public class MediaHandler extends IHandler {
     }
 
     private boolean handleGet(InfoMessage.Message message, Request request, Response response, Callback callback) {
-        String content = Templater.renderTemplate("media_list.ftl", Map.of());
+        String infoMessage = message == null ? "" : message.message();
+
+        String content = Templater.renderTemplate("media_list.ftl", Map.of("infoMessage", infoMessage));
         String fullPage = Templater.renderBaseTemplate(request,"HydroWiki", content);
         sendHtml(200, fullPage, response, callback);
         return true;
     }
 
     private boolean handlePost(Request request, Response response, Callback callback) {
-        // todo check if logged in
+        if (getLoggedIn(request) == null) { // refuse service if not logged in
+            return false;
+        }
+
         String contentType = request.getHeaders().get("Content-Type");
         MultiPartConfig config = new MultiPartConfig.Builder()
                 .location(Path.of("/tmp/"))
                 .maxPartSize(1024 * 1024) // max 1 MB
                 .build();
 
-        MultiPartFormData.onParts(request, request, contentType, config, new Promise.Invocable<>() {
-            @Override
-            public void succeeded(MultiPartFormData.Parts parts) {
-                parts.forEach(p -> {
-                    String filename = p.getFileName();
-                    System.out.println("Received file: "+filename);
-                });
-                //try {
-                    // todo will fuck up any other uploads happening simultaneously, rather go for /tmp/ instead
-                    //Files.deleteIfExists(Path.of("temp/"));
-                //} catch (IOException e) {
-                //    logger.error("Could not delete temp/");
-                //}
-            }
+        MultiPartFormData.Parts parts = MultiPartFormData.getParts(request, request, contentType, config);
+        MultiPart.Part filePart = parts.iterator().next();
+        if (getContext().getS3Interactor().fileExists(filePart.getFileName())) {
+            return handleGet(new InfoMessage.Message(InfoMessage.TYPE.ERROR, "File with identical name already exists"), request, response, callback);
+        }
+        byte[] fileBytes;
+        try {
+            fileBytes = Content.Source.asInputStream(filePart.getContentSource()).readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-            @Override
-            public void failed(Throwable x) {
-                x.printStackTrace();
-            }
-        });
+        getContext().getS3Interactor().uploadFile(filePart.getFileName(), fileBytes);
 
-        return handleGet(new InfoMessage.Message(InfoMessage.TYPE.WARNING, "Probably didnt receive image"), request, response, callback);
+        return handleGet(new InfoMessage.Message(InfoMessage.TYPE.SUCCESS, "Uploaded image"), request, response, callback);
     }
 }
