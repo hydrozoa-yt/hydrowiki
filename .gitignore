@@ -44,3 +44,4 @@ bin/
 .idea/
 dis/
 data/config.properties
+backup.ps1
