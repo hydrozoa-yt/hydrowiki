@@ -1,7 +1,7 @@
 package dk.hydrozoa.hydrowiki.ui;
 
-// todo add support for images [[file:test.png]]
-// todo add support for external links [[link:test.png]]
+// todo add support for images [[media:test.png]]
+// todo add support for external links [[link:example.com]]
 // todo add support for [ref]example.com[/res] and [[resources]]
 // todo add support for lists (ordered and unordered)
 public class WikiTextParser {

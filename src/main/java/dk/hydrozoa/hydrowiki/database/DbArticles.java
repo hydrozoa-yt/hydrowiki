@@ -66,7 +66,7 @@ public class DbArticles {
                 article_edits
             where 
                 article_id=?
-                && version=?
+                and version=?
             ;
             """;
 
