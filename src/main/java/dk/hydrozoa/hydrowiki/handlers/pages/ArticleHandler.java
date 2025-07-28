@@ -13,6 +13,7 @@ import dk.hydrozoa.hydrowiki.database.DbArticles;
 import dk.hydrozoa.hydrowiki.database.DbMedia;
 import dk.hydrozoa.hydrowiki.database.DbUsers;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
+import dk.hydrozoa.hydrowiki.ui.FlexmarkParser;
 import dk.hydrozoa.hydrowiki.ui.WikiTextParser;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
@@ -29,13 +30,13 @@ import java.util.Map;
 
 public class ArticleHandler extends IHandler {
 
-    private WikiTextParser parser;
+    private FlexmarkParser parser;
 
     private String S3_URL;
 
     public ArticleHandler(ServerContext ctx) {
         super(ctx);
-        parser = new WikiTextParser();
+        parser = new FlexmarkParser();
         S3_URL = ctx.getProperties().getProperty("s3.public_access");
     }
 
@@ -218,6 +219,7 @@ public class ArticleHandler extends IHandler {
                 "articleName", article.title(),
                 "articleNameHumanReadable", article.title().replace("_", " "),
                 "articleContent", parser.parse(article.content())
+                //"articleContent", article.content()
         );
 
         String content = Templater.renderTemplate("article/article.ftl", model);

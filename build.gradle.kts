@@ -26,6 +26,7 @@ dependencies {
     implementation("com.google.guava:guava:33.4.8-jre")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
     implementation("io.github.java-diff-utils:java-diff-utils:4.15")
+    implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
     implementation("software.amazon.awssdk:s3:2.32.6")
     implementation("software.amazon.awssdk:protocol-core:2.32.6")
 
