@@ -1,4 +1,4 @@
-package dk.hydrozoa.hydrowiki.ui;
+package dk.hydrozoa.hydrowiki.parser;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -7,6 +7,7 @@ import java.util.Iterator;
 // todo add support for external links [[link:example.com]]
 // todo add support for [ref]example.com[/ref] and [[resources]]
 // todo add support for lists (ordered and unordered)
+@Deprecated
 public class WikiTextParser {
 
     private static final String HEADING_1_ID = "=";
