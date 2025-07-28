@@ -18,7 +18,6 @@ import java.util.ArrayList;
  * Parser that uses flexmark for building a model of the input, and html rendering.
  * This is currently the main parser used.
  */
-// todo configure wikilink plugin
 // todo configure image plugin
 public class FlexmarkParser {
 
@@ -33,7 +32,6 @@ public class FlexmarkParser {
         ArrayList<Extension> extensions = new ArrayList<>();
 
         // Configure wikilinks
-        // todo figure out why wikilinks are not rendering
         extensions.add(WikiLinkExtension.create());
         dataSet.set(WikiLinkExtension.DISABLE_RENDERING, false);
         dataSet.set(WikiLinkExtension.LINK_FIRST_SYNTAX, true);
