@@ -44,24 +44,6 @@
                         </a>
                     </div>
                 </#list>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <img src="https://placehold.co/600x400/EEE/31343C" class="img-fluid rounded shadow-sm" alt="Placeholder image">
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <img src="https://placehold.co/600x400/5E6687/FFF" class="img-fluid rounded shadow-sm" alt="Placeholder image">
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <img src="https://placehold.co/600x400/3E4357/FFF" class="img-fluid rounded shadow-sm" alt="Placeholder image">
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <img src="https://placehold.co/600x400/9C91A5/FFF" class="img-fluid rounded shadow-sm" alt="Placeholder image">
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <img src="https://placehold.co/600x400/292C37/FFF" class="img-fluid rounded shadow-sm" alt="Placeholder image">
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <img src="https://placehold.co/600x400/D0D3DB/31343C" class="img-fluid rounded shadow-sm" alt="Placeholder image">
-                </div>
             </div>
         <#else>
             <p>No media found.</p>

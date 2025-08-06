@@ -100,4 +100,34 @@ public class DbMedia {
         }
         return -1;
     }
+
+    /**
+     * Deletes an entry from the 'uploaded_media' table by its filename.
+     *
+     * @param filename The name of the file to delete.
+     * @param con The database connection.
+     * @param counter A counter object to track operations.
+     * @return The number of rows deleted, or -1 if an error occurred.
+     */
+    public static int deleteMedia(String filename, Connection con, Counter counter) {
+        counter.increment(); // Increment the counter for this operation
+        String query = """
+            DELETE FROM
+                uploaded_media
+            WHERE
+                filename = ?;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setString(1, filename);
+            // Use executeUpdate() for DELETE, INSERT, UPDATE statements.
+            // It returns the row count of affected rows.
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected;
+        } catch (SQLException e) {
+            System.err.println("Error deleting media entry: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return -1; // Return -1 to indicate an error
+    }
 }

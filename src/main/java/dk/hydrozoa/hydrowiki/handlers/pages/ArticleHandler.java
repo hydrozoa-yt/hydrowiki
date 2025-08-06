@@ -13,6 +13,7 @@ import dk.hydrozoa.hydrowiki.database.DbArticles;
 import dk.hydrozoa.hydrowiki.database.DbMedia;
 import dk.hydrozoa.hydrowiki.database.DbUsers;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
+import dk.hydrozoa.hydrowiki.model.InfoMessage;
 import dk.hydrozoa.hydrowiki.parser.FlexmarkParser;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
@@ -59,12 +60,15 @@ public class ArticleHandler extends IHandler {
         }
     }
 
+    // todo change infoMessage to be attribute instead
+    // todo split this behemoth into seperate methods
     private boolean handleGet(String infoMessage, String[] pathTokens, Request request, Response response, Callback callback) {
         DbUsers.RUser loggedIn = getLoggedIn(request);
 
         String articleName = pathTokens[1];
 
         if (articleName.startsWith("media:")) { // display media version of article
+            // retrieve media entry in db
             DbMedia.RMedia media;
             String authorUsername;
             try (Connection con = getContext().getDBConnectionPool().getConnection()) {
@@ -72,6 +76,25 @@ public class ArticleHandler extends IHandler {
                 authorUsername = DbUsers.getUser(media.id(), con, new Counter()).username();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
+            }
+
+            // check if fields where we should act
+            Fields fields = Request.extractQueryParameters(request);
+            String actionField = fields.getValue("action");
+            if (loggedIn != null && actionField != null) {
+                if (actionField.equalsIgnoreCase("delete") && loggedIn.rights() >= 1) {
+                    // todo test if this works
+                    getContext().getS3Interactor().deleteFile(media.filename());
+                    try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                        DbMedia.deleteMedia(media.filename(), con, new Counter());
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    InfoMessage.Message errorMessage = new InfoMessage.Message(InfoMessage.TYPE.SUCCESS, "Deleted media "+media.filename());
+                    request.getSession(true).setAttribute("infoMessage", errorMessage);
+                    Response.sendRedirect(request, response, callback, "/media/");
+                    return true;
+                }
             }
 
             Map model = Map.of(

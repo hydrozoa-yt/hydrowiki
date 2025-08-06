@@ -7,14 +7,15 @@ import java.sql.SQLException;
 
 public class DbUsers {
 
-    public record RUser(int id, String username, String email, String password){}
+    public record RUser(int id, String username, String email, String password, int rights){}
 
     private static RUser userFromResultSet(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String username = rs.getString("username");
         String email = rs.getString("email");
         String password = rs.getString("password");
-        return new RUser(id, username, email, password);
+        int rights = rs.getInt("rights");
+        return new RUser(id, username, email, password, rights);
     }
 
     /**
