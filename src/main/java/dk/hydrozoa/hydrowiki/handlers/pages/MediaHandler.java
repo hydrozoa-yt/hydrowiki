@@ -23,12 +23,14 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionException;
 
 /**
  * Displays list of all media currently in the database as well as has an option to upload new media.
- * Should also be able to serve media at /media?name=example.jpeg, although in production those would be served by
+ * Should also be able to serve media at /media/?name=example.jpeg, although in production those would be served by
  * nginx or similar without invoking the app.
  */
 public class MediaHandler extends IHandler {
@@ -36,6 +38,11 @@ public class MediaHandler extends IHandler {
     final Logger logger = LoggerFactory.getLogger(MediaHandler.class);
 
     private String S3_URL;
+
+    /**
+     * Max filesize for uploaded media in megabytes.
+     */
+    private final int MAX_UPLOAD_SIZE = 4;
 
     public MediaHandler(ServerContext ctx) {
         super(ctx);
@@ -55,12 +62,13 @@ public class MediaHandler extends IHandler {
                 return handlePost(request, response, callback);
             case "GET":
             default:
-                return handleGet(null, request, response, callback);
+                return handleGet(request, response, callback);
         }
     }
 
-    private boolean handleGet(InfoMessage.Message message, Request request, Response response, Callback callback) {
-        String infoMessage = message == null ? "" : message.message();
+    private boolean handleGet(Request request, Response response, Callback callback) {
+        InfoMessage.Message message = (InfoMessage.Message) request.getSession(false).getAttribute("infoMessage");
+        request.getSession(false).removeAttribute("infoMessage");
 
         List<DbMedia.RMedia> allMedia = List.of();
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
@@ -77,10 +85,11 @@ public class MediaHandler extends IHandler {
             mediaModel.add(model);
         });
 
-        Map model = Map.of(
-                "infoMessage", infoMessage,
-                "medias", mediaModel
-        );
+        Map model = new HashMap();
+        model.put("medias", mediaModel);
+        if (message != null) {
+            model.put("infoMessage", InfoMessage.toModel(message));
+        }
 
         String content = Templater.renderTemplate("media_list.ftl", model);
         String fullPage = Templater.renderBaseTemplate(request,"HydroWiki", content);
@@ -97,14 +106,38 @@ public class MediaHandler extends IHandler {
         String contentType = request.getHeaders().get("Content-Type");
         MultiPartConfig config = new MultiPartConfig.Builder()
                 .location(Path.of("/tmp/"))
-                .maxPartSize(1024 * 1024) // max 1 MB
+                .maxPartSize(MAX_UPLOAD_SIZE * 1024 * 1024) // max 1 MB
                 .build();
 
-        MultiPartFormData.Parts parts = MultiPartFormData.getParts(request, request, contentType, config);
+        MultiPartFormData.Parts parts = null;
+        try {
+            parts = MultiPartFormData.getParts(request, request, contentType, config);
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof IllegalStateException) {
+                InfoMessage.Message errorMessage = new InfoMessage.Message(InfoMessage.TYPE.ERROR, "Media filesize too large");
+                request.getSession(true).setAttribute("infoMessage", errorMessage);
+
+                Response.sendRedirect(request, response, callback, "/media/", true);
+                return true;
+            } else {
+                InfoMessage.Message errorMessage = new InfoMessage.Message(InfoMessage.TYPE.ERROR, "Unexpected error");
+                request.getSession(true).setAttribute("infoMessage", errorMessage);
+
+                Response.sendRedirect(request, response, callback, "/media/", true);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         MultiPart.Part filePart = parts.iterator().next();
         String filename = filePart.getFileName();
         if (getContext().getS3Interactor().fileExists(filename)) {
-            return handleGet(new InfoMessage.Message(InfoMessage.TYPE.ERROR, "File with identical name already exists"), request, response, callback);
+            InfoMessage.Message message = new InfoMessage.Message(InfoMessage.TYPE.ERROR, "File with identical name already exists");
+            request.getSession(true).setAttribute("infoMessage", message);
+
+            Response.sendRedirect(request, response, callback, "/media/", true);
+            return true;
         }
         byte[] fileBytes;
         try {
@@ -123,6 +156,10 @@ public class MediaHandler extends IHandler {
             throw new RuntimeException(e);
         }
 
-        return handleGet(new InfoMessage.Message(InfoMessage.TYPE.SUCCESS, "Uploaded image given id "+mediaId), request, response, callback);
+        InfoMessage.Message message = new InfoMessage.Message(InfoMessage.TYPE.SUCCESS, "Successfully uploaded media");
+        request.getSession(true).setAttribute("infoMessage", message);
+
+        Response.sendRedirect(request, response, callback, "/media/", true);
+        return true;
     }
 }
