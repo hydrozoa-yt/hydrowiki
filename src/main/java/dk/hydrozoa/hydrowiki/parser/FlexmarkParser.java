@@ -18,7 +18,6 @@ import java.util.ArrayList;
  * Parser that uses flexmark for building a model of the input, and html rendering.
  * This is currently the main parser used.
  */
-// todo configure image plugin
 public class FlexmarkParser {
 
     NodeVisitor headerVisitor = new NodeVisitor(
@@ -27,7 +26,10 @@ public class FlexmarkParser {
 
     private DataHolder dataHolder;
 
-    public FlexmarkParser() {
+    private String s3url;
+
+    public FlexmarkParser(String s3url) {
+        this.s3url = s3url;
         MutableDataSet dataSet = new MutableDataSet();
         ArrayList<Extension> extensions = new ArrayList<>();
 
@@ -37,8 +39,7 @@ public class FlexmarkParser {
         dataSet.set(WikiLinkExtension.LINK_FIRST_SYNTAX, true);
         dataSet.set(WikiLinkExtension.LINK_PREFIX, "/w/");
         dataSet.set(WikiLinkExtension.IMAGE_LINKS, true);
-
-        extensions.add(AutolinkExtension.create());
+        dataSet.set(WikiLinkExtension.IMAGE_PREFIX, s3url);
 
         dataSet.set(Parser.EXTENSIONS, extensions);
         dataHolder = dataSet;

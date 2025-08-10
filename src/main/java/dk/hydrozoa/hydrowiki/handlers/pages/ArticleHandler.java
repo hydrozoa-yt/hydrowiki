@@ -36,8 +36,8 @@ public class ArticleHandler extends IHandler {
 
     public ArticleHandler(ServerContext ctx) {
         super(ctx);
-        parser = new FlexmarkParser();
         S3_URL = ctx.getProperties().getProperty("s3.public_access");
+        parser = new FlexmarkParser(S3_URL);
     }
 
     @Override
@@ -70,10 +70,10 @@ public class ArticleHandler extends IHandler {
         if (articleName.startsWith("media:")) { // display media version of article
             // retrieve media entry in db
             DbMedia.RMedia media;
-            String authorUsername;
+            String authorUsername = null;
             try (Connection con = getContext().getDBConnectionPool().getConnection()) {
                 media = DbMedia.getMedia(articleName.replace("media:", ""), con, new Counter());
-                authorUsername = DbUsers.getUser(media.id(), con, new Counter()).username();
+                authorUsername = DbUsers.getUser(media.userId(), con, new Counter()).username();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

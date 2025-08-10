@@ -41,12 +41,12 @@ CREATE TABLE IF NOT EXISTS `article_edits` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO `users` (`username`, `email`, `password`, `rights`) VALUES
-('admin_user', 'admin@example.com', 'password', 1),
-('test_user', 'test@example.com', 'password', 0);
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `rights`) VALUES
+(1, 'admin_user', 'admin@example.com', 'password', 1),
+(2, 'test_user', 'test@example.com', 'password', 0);
 
 INSERT INTO `articles` (`title`, `content`) VALUES
 ('Invasion_of_the_heymen', 'This is an article describing the historical event "Invasion of the heymen", and it explains the happenings as well as the historical significance of the event.'),
 ('Lesson_in_never_backing_down', 'This is a description of the steps one needs to take, in order to never back down. \n [[This]] is a wikilink.'),
-('Formatting guide', '# Heading 1 \n This is not a good guide yet.')
+('Formatting guide', '# Heading 1 \nThis is a heading 1. \n## Heading 2 \nThis is a heading 2.\n# Wikilinks\nThis is a [[link]] to an article.\n# Images\n![[image_test.png]]')
 ;
