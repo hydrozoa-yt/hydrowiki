@@ -10,6 +10,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.Fields;
+import org.eclipse.jetty.util.UrlEncoded;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -66,7 +67,7 @@ public class NewArticleHandler extends IHandler {
             DbArticles.insertArticleEdit(user.id(), id, diffToPrevious, articleContent.length(), con, getDatabaseLookupCounter());
 
             if (id != -1) {
-                Response.sendRedirect(request, response, callback, "/w/"+articleTitle);
+                Response.sendRedirect(request, response, callback, "/w/"+UrlEncoded.encodeString(articleTitle));
                 return true;
             }
         } catch (SQLException e) {
