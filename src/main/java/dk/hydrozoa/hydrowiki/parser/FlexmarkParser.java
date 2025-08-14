@@ -1,7 +1,6 @@
 package dk.hydrozoa.hydrowiki.parser;
 
 import com.vladsch.flexmark.ast.Heading;
-import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;

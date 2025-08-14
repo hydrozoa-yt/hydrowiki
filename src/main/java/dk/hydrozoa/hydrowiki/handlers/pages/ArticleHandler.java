@@ -84,10 +84,27 @@ public class ArticleHandler extends IHandler {
 
         Fields fields = Request.extractQueryParameters(request);
         if (fields != null) {
+            String action = fields.getValue("action");
+
+            if (action != null && action.equalsIgnoreCase("delete")) {
+                if (loggedIn.rights() > 0) {
+                    try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                        DbArticles.deleteArticle(article.id(), con, new Counter());
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    // todo handle infomessage in "/all" handler
+                    InfoMessage.Message errorMessage = new InfoMessage.Message(InfoMessage.TYPE.SUCCESS, "Deleted article "+article.title());
+                    request.getSession(true).setAttribute("infoMessage", errorMessage);
+                    Response.sendRedirect(request, response, callback, "/all/");
+                }
+            }
+
             // todo dont have to iterate over the fields multiple times, should just be once
             if (fields.stream().anyMatch(p-> p.getName().equalsIgnoreCase("action") && p.getValue().equalsIgnoreCase("edit"))) {
                 // display article for editing
                 Map model = Map.of(
+                        "loggedIn", loggedIn != null,
                         "articleName", article.title(),
                         "articleNameHumanReadable", article.title().replace("_", " "),
                         "articleContentCode", article.content(),
@@ -195,6 +212,13 @@ public class ArticleHandler extends IHandler {
             }
         }
 
+        return sendArticle(loggedIn, article, request, response, callback);
+    }
+
+    /**
+     * Sends a normal article with name and content text. This is the default view of an article.
+     */
+    private boolean sendArticle(DbUsers.RUser loggedIn, DbArticles.RArticle article, Request request, Response response, Callback callback) {
         // display article for reading
         Map model = Map.of(
                 "loggedIn", getLoggedIn(request) != null,
@@ -204,11 +228,15 @@ public class ArticleHandler extends IHandler {
         );
 
         String content = Templater.renderTemplate("article/article.ftl", model);
-        String fullPage = Templater.renderBaseTemplate(request, articleName, content);
+        String fullPage = Templater.renderBaseTemplate(request, article.title(), content);
         sendHtml(200, fullPage, response, callback);
         return true;
     }
 
+    /**
+     * Sends article for a media.
+     * This will contain the name, show the media, some info and option to delete.
+     */
     private boolean sendMediaArticle(DbUsers.RUser loggedIn, String articleName, Request request, Response response, Callback callback) {
         DbMedia.RMedia media;
         String authorUsername = null;

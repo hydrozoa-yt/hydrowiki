@@ -296,4 +296,47 @@ public class DbArticles {
         }
         return false;
     }
+
+    /**
+     * Deletes an entry from the 'articles' table by its id, and all associated entries in table "article_edits".
+     */
+    public static int deleteArticle(int articleID, Connection con, Counter counter) {
+        counter.increment();
+        String queryArticles = """
+            DELETE FROM
+                articles
+            WHERE
+                id = ?;
+            """;
+
+        int rowsAffected = 0;
+
+        try (PreparedStatement pstmt = con.prepareStatement(queryArticles)) {
+            pstmt.setInt(1, articleID);
+            rowsAffected += pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error deleting article entry: " + e.getMessage());
+            e.printStackTrace();
+            return -1;
+        }
+
+        counter.increment();
+        String queryEdits = """
+            DELETE FROM
+                article_edits
+            WHERE
+                article_id = ?;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(queryEdits)) {
+            pstmt.setInt(1, articleID);
+            rowsAffected += pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error deleting article edits entry: " + e.getMessage());
+            e.printStackTrace();
+            return -1;
+        }
+
+        return rowsAffected;
+    }
 }
