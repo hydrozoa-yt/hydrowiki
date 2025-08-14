@@ -68,47 +68,7 @@ public class ArticleHandler extends IHandler {
         String articleName = pathTokens[1];
 
         if (articleName.startsWith("media:")) { // display media version of article
-            // retrieve media entry in db
-            DbMedia.RMedia media;
-            String authorUsername = null;
-            try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-                media = DbMedia.getMedia(articleName.replace("media:", ""), con, new Counter());
-                authorUsername = DbUsers.getUser(media.userId(), con, new Counter()).username();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-
-            // check if fields where we should act
-            Fields fields = Request.extractQueryParameters(request);
-            String actionField = fields.getValue("action");
-            if (loggedIn != null && actionField != null) {
-                if (actionField.equalsIgnoreCase("delete") && loggedIn.rights() >= 1) {
-                    // todo test if this works
-                    getContext().getS3Interactor().deleteFile(media.filename());
-                    try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-                        DbMedia.deleteMedia(media.filename(), con, new Counter());
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                    InfoMessage.Message errorMessage = new InfoMessage.Message(InfoMessage.TYPE.SUCCESS, "Deleted media "+media.filename());
-                    request.getSession(true).setAttribute("infoMessage", errorMessage);
-                    Response.sendRedirect(request, response, callback, "/media/");
-                    return true;
-                }
-            }
-
-            Map model = Map.of(
-                    "mediaUrl", S3_URL+"/"+media.filename(),
-                    "articleName", articleName,
-                    "loggedIn", loggedIn != null,
-                    "user", authorUsername,
-                    "creation", media.created().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            );
-
-            String content = Templater.renderTemplate("article/article_media.ftl", model);
-            String fullPage = Templater.renderBaseTemplate(request, articleName, content);
-            sendHtml(200, fullPage, response, callback);
-            return true;
+            return sendMediaArticle(loggedIn, articleName, request, response, callback);
         }
 
         DbArticles.RArticle article = null;
@@ -241,10 +201,52 @@ public class ArticleHandler extends IHandler {
                 "articleName", article.title(),
                 "articleNameHumanReadable", article.title().replace("_", " "),
                 "articleContent", parser.parse(article.content())
-                //"articleContent", article.content()
         );
 
         String content = Templater.renderTemplate("article/article.ftl", model);
+        String fullPage = Templater.renderBaseTemplate(request, articleName, content);
+        sendHtml(200, fullPage, response, callback);
+        return true;
+    }
+
+    private boolean sendMediaArticle(DbUsers.RUser loggedIn, String articleName, Request request, Response response, Callback callback) {
+        DbMedia.RMedia media;
+        String authorUsername = null;
+        try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+            media = DbMedia.getMedia(articleName.replace("media:", ""), con, new Counter());
+            authorUsername = DbUsers.getUser(media.userId(), con, new Counter()).username();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        // check if fields where we should act
+        Fields fields = Request.extractQueryParameters(request);
+        String actionField = fields.getValue("action");
+        if (loggedIn != null && actionField != null) {
+            if (actionField.equalsIgnoreCase("delete") && loggedIn.rights() >= 1) {
+                // todo test if this works
+                getContext().getS3Interactor().deleteFile(media.filename());
+                try (Connection con = getContext().getDBConnectionPool().getConnection()) {
+                    DbMedia.deleteMedia(media.filename(), con, new Counter());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                InfoMessage.Message errorMessage = new InfoMessage.Message(InfoMessage.TYPE.SUCCESS, "Deleted media "+media.filename());
+                request.getSession(true).setAttribute("infoMessage", errorMessage);
+                Response.sendRedirect(request, response, callback, "/media/");
+                return true;
+            }
+        }
+
+        Map model = Map.of(
+                "mediaUrl", S3_URL+"/"+media.filename(),
+                "articleName", articleName,
+                "loggedIn", loggedIn != null,
+                "user", authorUsername,
+                "creation", media.created().toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        );
+
+        String content = Templater.renderTemplate("article/article_media.ftl", model);
         String fullPage = Templater.renderBaseTemplate(request, articleName, content);
         sendHtml(200, fullPage, response, callback);
         return true;

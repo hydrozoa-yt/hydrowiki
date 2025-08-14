@@ -39,7 +39,7 @@ public class FlexmarkParser {
         dataSet.set(WikiLinkExtension.LINK_FIRST_SYNTAX, true);
         dataSet.set(WikiLinkExtension.LINK_PREFIX, "/w/");
         dataSet.set(WikiLinkExtension.IMAGE_LINKS, true);
-        dataSet.set(WikiLinkExtension.IMAGE_PREFIX, s3url);
+        dataSet.set(WikiLinkExtension.IMAGE_PREFIX, s3url+"/");
 
         dataSet.set(Parser.EXTENSIONS, extensions);
         dataHolder = dataSet;
