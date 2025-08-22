@@ -5,7 +5,7 @@
         <#if articles?? && articles?size gt 0>
             <#list articles as item>
                 <li class="list-group-item">
-                    <a href="/w/${item.title}">${item.title}</a>
+                    <a href="/w/${item.title}">${item.titleHumanReadable}</a>
                 </li>
             </#list>
         <#else>
