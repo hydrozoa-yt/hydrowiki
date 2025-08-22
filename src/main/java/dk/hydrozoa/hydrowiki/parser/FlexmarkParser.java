@@ -1,15 +1,24 @@
 package dk.hydrozoa.hydrowiki.parser;
 
 import com.vladsch.flexmark.ast.Heading;
+import com.vladsch.flexmark.ast.Image;
+import com.vladsch.flexmark.ext.wikilink.WikiImage;
 import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
+import com.vladsch.flexmark.html.AttributeProvider;
+import com.vladsch.flexmark.html.AttributeProviderFactory;
 import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.html.IndependentAttributeProviderFactory;
+import com.vladsch.flexmark.html.renderer.AttributablePart;
+import com.vladsch.flexmark.html.renderer.LinkResolverContext;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.util.ast.VisitHandler;
 import com.vladsch.flexmark.util.data.DataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import com.vladsch.flexmark.util.html.MutableAttributes;
 import com.vladsch.flexmark.util.misc.Extension;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -18,6 +27,27 @@ import java.util.ArrayList;
  * This is currently the main parser used.
  */
 public class FlexmarkParser {
+
+    static class ImageAttributeProvider implements AttributeProvider {
+        static AttributeProviderFactory Factory() {
+            return new IndependentAttributeProviderFactory() {
+                @Override
+                public @NotNull AttributeProvider apply(@NotNull LinkResolverContext linkResolverContext) {
+                    return new ImageAttributeProvider();
+                }
+            };
+        }
+
+        @Override
+        public void setAttributes(@NotNull Node node, @NotNull AttributablePart attributablePart, @NotNull MutableAttributes mutableAttributes) {
+            if (node instanceof Image) {
+                mutableAttributes.addValue("class", "img-fluid");
+            }
+            if (node instanceof WikiImage) {
+                mutableAttributes.addValue("class", "img-fluid");
+            }
+        }
+    }
 
     NodeVisitor headerVisitor = new NodeVisitor(
             new VisitHandler<>(Heading.class, this::visitHeadings)
@@ -57,7 +87,10 @@ public class FlexmarkParser {
 
         headerVisitor.visit(document);
 
-        HtmlRenderer renderer = HtmlRenderer.builder(dataHolder).build();
+        HtmlRenderer renderer = HtmlRenderer
+                .builder(dataHolder)
+                .attributeProviderFactory(ImageAttributeProvider.Factory())
+                .build();
         return renderer.render(document);
     }
 }
