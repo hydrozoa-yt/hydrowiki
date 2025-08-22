@@ -1,15 +1,14 @@
 # HydroWiki
 This is a basic wiki software created for fun. 
 
-The following technologies are used:
-* Jetty, for the webserver
+The following libraries are used:
+* Jetty, for networking
 * FreeMarker, for templating
 * MariaDB, for the database
 * java-diff-utils for comparison operations
-* Gradle, for building
 
 ## Features
-* Simple wikitext parser (only headings, wikilinks and paragraphs)
+* Wikitext parser (markdown, wikilinks and -images)
 * Writing new articles
 * Display random article
 * Display recent changes
