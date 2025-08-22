@@ -56,12 +56,7 @@ s3.public_access = https://example-bucket.example.cloud
 3. Run the hydrowiki jar on your server by running `java -jar hydrowiki.jar`, or create a systemd task that starts it
 
 ## Future development
-The following features are in development:
-* Uploadable images by users
-
 The following features are planned:
-* Generative reference tables
 * Red links for missing articles
-* Wikitext support for external links and lists 
 * Page last edited on all articles
 * Debug info containing nanos to render the page and number of database lookups
