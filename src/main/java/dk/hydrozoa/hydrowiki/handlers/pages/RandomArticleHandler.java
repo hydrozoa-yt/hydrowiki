@@ -6,6 +6,7 @@ import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.UrlEncoded;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,7 +29,8 @@ public class RandomArticleHandler extends IHandler {
             List<DbArticles.RArticle> list = DbArticles.getAllArticles(con, getDatabaseLookupCounter());
             int index = random.nextInt(list.size());
             DbArticles.RArticle selected = list.get(index);
-            Response.sendRedirect(request, response, callback, "/w/"+selected.title());
+            String urlEncodedTitle = UrlEncoded.encodeString(selected.title());
+            Response.sendRedirect(request, response, callback, "/w/"+urlEncodedTitle);
             return true;
         } catch (SQLException e) {
             throw new RuntimeException(e);
