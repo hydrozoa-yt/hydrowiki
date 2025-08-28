@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `articles` (
     `content` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE articles ADD FULLTEXT INDEX idx_ft_title_content (title,content);
 
 CREATE TABLE IF NOT EXISTS `uploaded_media` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -46,7 +47,7 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `rights`) VALUES
 (2, 'test_user', 'test@example.com', 'password', 0);
 
 INSERT INTO `articles` (`title`, `content`) VALUES
-('Invasion_of_the_heymen', 'This is an article describing the historical event "Invasion of the heymen", and it explains the happenings as well as the historical significance of the event.'),
-('Lesson_in_never_backing_down', 'This is a description of the steps one needs to take, in order to never back down. \n [[This]] is a wikilink.'),
+('Invasion of the heymen', 'This is an article describing the historical event "Invasion of the heymen", and it explains the happenings as well as the historical significance of the event.'),
+('Lesson in never backing down', 'This is a description of the steps one needs to take, in order to never back down. \n [[This]] is a wikilink.'),
 ('Formatting_guide', '# Heading 1 \nThis is a heading 1. \n## Heading 2 \nThis is a heading 2.\n# Wikilinks\nThis is a [[link]] to an article.\n# Images\n![[image_test.png]]')
 ;

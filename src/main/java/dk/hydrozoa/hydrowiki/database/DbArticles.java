@@ -85,6 +85,34 @@ public class DbArticles {
         return null;
     }
 
+    public static List<RArticle> searchArticles(String terms, Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            select 
+                * 
+            from 
+                articles
+            where 
+                MATCH(title, content) AGAINST (?)
+            ;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setString(1, terms);
+
+            try (ResultSet rs = pstmt.executeQuery();) {
+                List<RArticle> result = new ArrayList<>();
+                while (rs.next()) {
+                    result.add(articleFromResultSet(rs));
+                }
+                return result;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     /**
      * Gets all the edits between the newest version and the specified version, ordered by the newest version first.
      */

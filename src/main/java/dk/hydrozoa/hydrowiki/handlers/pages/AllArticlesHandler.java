@@ -29,8 +29,8 @@ public class AllArticlesHandler extends IHandler {
         List<Map> articles = new ArrayList<>();
         results.forEach(row -> {
             articles.add(Map.of(
-                    "title", row.title(),
-                    "titleHumanReadable", row.title().replace("_", " ")
+                    "title", row.title().replace(" ", "_"),
+                    "titleHumanReadable", row.title()
                     )
             );
         });

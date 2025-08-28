@@ -51,10 +51,7 @@ public class NewArticleHandler extends IHandler {
         String articleContent = null;
         try {
             Fields f = Request.getParameters(request);
-            articleTitle = f.getValue("articleTitle").trim().replace(" ", "_");
-            if (articleTitle.contains(" ")) {
-                articleTitle = articleTitle.replace(" ", "_");
-            }
+            articleTitle = f.getValue("articleTitle").trim();
             articleContent = f.getValue("articleContent");
         } catch (Exception e) {
             throw new RuntimeException(e);

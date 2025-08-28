@@ -65,7 +65,7 @@ public class ArticleHandler extends IHandler {
     private boolean handleGet(String infoMessage, String[] pathTokens, Request request, Response response, Callback callback) {
         DbUsers.RUser loggedIn = getLoggedIn(request);
 
-        String articleName = pathTokens[1];
+        String articleName = pathTokens[1].replace("_", " ");
 
         if (articleName.startsWith("media:")) { // display media version of article
             return sendMediaArticle(loggedIn, articleName, request, response, callback);
