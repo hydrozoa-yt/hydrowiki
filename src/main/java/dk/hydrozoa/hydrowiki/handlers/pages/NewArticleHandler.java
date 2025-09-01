@@ -64,7 +64,7 @@ public class NewArticleHandler extends IHandler {
             DbArticles.insertArticleEdit(user.id(), id, diffToPrevious, articleContent.length(), con, getDatabaseLookupCounter());
 
             if (id != -1) {
-                Response.sendRedirect(request, response, callback, "/w/"+UrlEncoded.encodeString(articleTitle));
+                Response.sendRedirect(request, response, callback, "/w/"+UrlEncoded.encodeString(articleTitle.replace(" ", "_")));
                 return true;
             }
         } catch (SQLException e) {

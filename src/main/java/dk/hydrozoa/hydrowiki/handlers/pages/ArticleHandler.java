@@ -300,7 +300,7 @@ public class ArticleHandler extends IHandler {
         }
 
         // find relevant article from url
-        String articleName = pathTokens[1];
+        String articleName = pathTokens[1].replace("_", " ");
 
         DbArticles.RArticle article = null;
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
