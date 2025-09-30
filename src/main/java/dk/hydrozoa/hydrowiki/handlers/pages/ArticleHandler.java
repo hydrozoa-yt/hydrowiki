@@ -266,7 +266,7 @@ public class ArticleHandler extends IHandler {
                 "articleContentCode", article.content()
         ));
         if (message != null) {
-            model.put("infoMessage2", message);
+            model.put("infoMessage2", InfoMessage.toModel(message));
         }
 
         if (aliases != null) {
