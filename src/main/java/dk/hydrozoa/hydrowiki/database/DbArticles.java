@@ -8,14 +8,23 @@ public class DbArticles {
 
     public record RArticle(int id, String title, String content){}
 
-    public record RArticleEdit(int id, int articleId, int version, int userId, String diff, int charLenDiff, Timestamp created) {}
-
     private static RArticle articleFromResultSet(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String title = rs.getString("title");
         String content = rs.getString("content");;
         return new RArticle(id, title, content);
     }
+
+    public record RArticleAlias(int id, String title, int articleId){}
+
+    private static RArticleAlias articleAliasFromResultSet(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        String title = rs.getString("title");
+        int articleId = rs.getInt("article_id");;
+        return new RArticleAlias(id, title, articleId);
+    }
+
+    public record RArticleEdit(int id, int articleId, int version, int userId, String diff, int charLenDiff, Timestamp created) {}
 
     private static RArticleEdit articleEditFromResultSet(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
@@ -26,6 +35,60 @@ public class DbArticles {
         int charLenDiff = rs.getInt("character_len_diff");
         Timestamp created = rs.getTimestamp("created_at");
         return new RArticleEdit(id, articleId, version, userId, diff, charLenDiff, created);
+    }
+
+    public static List<RArticleAlias> getAliases(int articleId, Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            select 
+                * 
+            from 
+                article_alias
+            where 
+                article_id=?
+            ;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setInt(1, articleId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                List<RArticleAlias> result = new ArrayList<>();
+                while (rs.next()) {
+                    result.add(articleAliasFromResultSet(rs));
+                }
+                return result;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean getAliasExists(String title, Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            select 
+                1 
+            from 
+                article_alias
+            where 
+                title=?
+            ;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setString(1, title);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) == 1;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -46,7 +109,7 @@ public class DbArticles {
         try (PreparedStatement pstmt = con.prepareStatement(query)) {
             pstmt.setString(1, title);
 
-            try (ResultSet rs = pstmt.executeQuery();) {
+            try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     return articleFromResultSet(rs);
                 }
@@ -83,6 +146,38 @@ public class DbArticles {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static RArticle searchArticleAlias(String alias, Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            select
+                articles.*
+            from 
+                article_alias
+            left join
+                articles
+            on
+                articles.id = article_alias.article_id
+            where 
+                article_alias.title = ?
+            limit 1
+            ;
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setString(1, alias);
+
+            try (ResultSet rs = pstmt.executeQuery();) {
+                if (rs.next()) {
+                    return articleFromResultSet(rs);
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static List<RArticle> searchArticles(String terms, Connection con, Counter counter) {
@@ -261,6 +356,32 @@ public class DbArticles {
         try (PreparedStatement pstmt = con.prepareStatement(query)) {
             pstmt.setString(1, title);
             pstmt.setString(2, content);
+            pstmt.executeQuery();
+
+            try (ResultSet rs = con.prepareStatement("SELECT LAST_INSERT_ID()").executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public static int insertArticleAlias(int articleId, String title, Connection con, Counter counter) {
+        counter.increment();
+        String query = """
+            INSERT INTO 
+                article_alias(
+                    title, 
+                    article_id) 
+                VALUES (?,?);
+            """;
+
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
+            pstmt.setString(1, title);
+            pstmt.setInt(2, articleId);
             pstmt.executeQuery();
 
             try (ResultSet rs = con.prepareStatement("SELECT LAST_INSERT_ID()").executeQuery()) {

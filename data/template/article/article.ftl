@@ -16,6 +16,9 @@
     <div class="row align-items-center mb-3">
         <div class="col-md-9 border-bottom">
             <h1>${articleNameHumanReadable}</h1>
+            <#if articleAliasRedirect??>
+                <p class="text-muted">Redirected from ${articleAliasRedirect}</p>
+            </#if>
         </div>
     </div>
     ${articleContent}

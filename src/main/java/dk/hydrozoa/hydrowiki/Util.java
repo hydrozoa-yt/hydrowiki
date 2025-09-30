@@ -43,4 +43,8 @@ public class Util {
         });
         return result.toString();
     }
+
+    public static String articleTitleToUrl(String articleTitle) {
+        return articleTitle.replace(" ", "_");
+    }
 }

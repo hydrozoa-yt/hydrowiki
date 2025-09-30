@@ -12,11 +12,30 @@
     - "positive-number": If the number is greater than 0.
 -->
 <#macro numberClassSpan number>
-  <#if number < 0>
-    <span class="text-danger">(${number})</span>
-  <#elseif number == 0>
-    <span class="text-secondary">(${number})</span>
-  <#else>
-    <span class="text-success">(${number})</span>
-  </#if>
+    <#if number < 0>
+        <span class="text-danger">(${number})</span>
+    <#elseif number == 0>
+        <span class="text-secondary">(${number})</span>
+    <#else>
+        <span class="text-success">(${number})</span>
+    </#if>
+</#macro>
+
+<#macro infoMessage message>
+    <#if message.type == "SUCCESS">
+        <div class="mb-5 alert alert-success alert-dismissible fade show" role="alert">
+            ${message.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <#elseif message.type == "ERROR">
+        <div class="mb-5 alert alert-danger alert-dismissible fade show" role="alert">
+            ${message.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <#elseif message.type == "WARNING">
+        <div class="mb-5 alert alert-warning alert-dismissible fade show" role="alert">
+            ${message.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </#if>
 </#macro>

@@ -3,6 +3,7 @@ package dk.hydrozoa.hydrowiki.handlers.pages;
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
 import dk.hydrozoa.hydrowiki.Util;
+import dk.hydrozoa.hydrowiki.database.Counter;
 import dk.hydrozoa.hydrowiki.database.DbArticles;
 import dk.hydrozoa.hydrowiki.database.DbUsers;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
@@ -58,10 +59,10 @@ public class NewArticleHandler extends IHandler {
         }
 
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            int id = DbArticles.insertArticle(articleTitle, articleContent, con, getDatabaseLookupCounter());
+            int id = DbArticles.insertArticle(articleTitle, articleContent, con, new Counter());
 
             String diffToPrevious = Util.generateDiffs(articleTitle, articleContent, "");
-            DbArticles.insertArticleEdit(user.id(), id, diffToPrevious, articleContent.length(), con, getDatabaseLookupCounter());
+            DbArticles.insertArticleEdit(user.id(), id, diffToPrevious, articleContent.length(), con, new Counter());
 
             if (id != -1) {
                 Response.sendRedirect(request, response, callback, "/w/"+UrlEncoded.encodeString(articleTitle.replace(" ", "_")));

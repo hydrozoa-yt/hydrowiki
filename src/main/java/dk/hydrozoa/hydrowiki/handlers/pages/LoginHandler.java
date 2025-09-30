@@ -58,7 +58,6 @@ public class LoginHandler  extends IHandler {
             DbUsers.RUser user = null;
             try (Connection con = getContext().getDBConnectionPool().getConnection()) {
                 user = DbUsers.getUser(username, con, new Counter());
-                System.out.println("username: " + username + " \t password: " + password);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

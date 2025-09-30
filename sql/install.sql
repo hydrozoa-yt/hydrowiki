@@ -25,6 +25,12 @@ CREATE TABLE IF NOT EXISTS `articles` (
 );
 ALTER TABLE articles ADD FULLTEXT INDEX idx_ft_title_content (title,content);
 
+CREATE TABLE IF NOT EXISTS `article_alias` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL UNIQUE,
+    `article_id` INT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS `uploaded_media` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `filename` VARCHAR(255) NOT NULL,

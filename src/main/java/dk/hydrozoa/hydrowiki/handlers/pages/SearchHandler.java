@@ -2,8 +2,10 @@ package dk.hydrozoa.hydrowiki.handlers.pages;
 
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
+import dk.hydrozoa.hydrowiki.Util;
 import dk.hydrozoa.hydrowiki.database.Counter;
 import dk.hydrozoa.hydrowiki.database.DbArticles;
+import dk.hydrozoa.hydrowiki.database.DbArticles.RArticle;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
@@ -30,9 +32,19 @@ public class SearchHandler extends IHandler {
             return true;
         }
 
-        List<DbArticles.RArticle> results = List.of();
+        RArticle aliasArticle = null;
+        List<RArticle> results = List.of();
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            results = DbArticles.searchArticles(terms, con, new Counter());
+            aliasArticle = DbArticles.searchArticleAlias(terms, con, new Counter());
+            if (aliasArticle == null) { // did not find alias, do full text search
+                results = DbArticles.searchArticles(terms, con, new Counter());
+            }
+        }
+
+        if (aliasArticle != null) { // redirect if found alias
+            request.getSession(true).setAttribute(ArticleHandler.SESSION_ATTRIB_REDIRECT, terms);
+            Response.sendRedirect(request, response, callback, "/w/"+Util.articleTitleToUrl(aliasArticle.title()));
+            return true;
         }
 
         List<Map> resultsModel = new ArrayList<>();

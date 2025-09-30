@@ -1,6 +1,7 @@
 package dk.hydrozoa.hydrowiki.handlers.pages;
 
 import dk.hydrozoa.hydrowiki.ServerContext;
+import dk.hydrozoa.hydrowiki.database.Counter;
 import dk.hydrozoa.hydrowiki.database.DbArticles;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import org.eclipse.jetty.server.Request;
@@ -26,7 +27,7 @@ public class RandomArticleHandler extends IHandler {
     public boolean handle(Request request, Response response, Callback callback) {
 
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            List<DbArticles.RArticle> list = DbArticles.getAllArticles(con, getDatabaseLookupCounter());
+            List<DbArticles.RArticle> list = DbArticles.getAllArticles(con, new Counter());
             int index = random.nextInt(list.size());
             DbArticles.RArticle selected = list.get(index);
             String urlEncodedTitle = UrlEncoded.encodeString(selected.title());

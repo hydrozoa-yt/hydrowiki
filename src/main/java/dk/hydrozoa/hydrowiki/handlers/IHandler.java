@@ -15,11 +15,8 @@ public abstract class IHandler extends Handler.Abstract {
 
     private ServerContext ctx;
 
-    private Counter databaseLookupCounter;
-
     public IHandler(ServerContext ctx) {
         this.ctx = ctx;
-        databaseLookupCounter = new Counter();
     }
 
     protected void sendHtml(int status, String content, Response response, Callback callback) {
@@ -42,7 +39,4 @@ public abstract class IHandler extends Handler.Abstract {
         return ctx;
     }
 
-    protected Counter getDatabaseLookupCounter() {
-        return databaseLookupCounter;
-    }
 }

@@ -2,6 +2,7 @@ package dk.hydrozoa.hydrowiki.handlers.pages;
 
 import dk.hydrozoa.hydrowiki.ServerContext;
 import dk.hydrozoa.hydrowiki.Templater;
+import dk.hydrozoa.hydrowiki.database.Counter;
 import dk.hydrozoa.hydrowiki.database.DbArticles;
 import dk.hydrozoa.hydrowiki.handlers.IHandler;
 import org.eclipse.jetty.server.Request;
@@ -24,7 +25,7 @@ public class RecentChangesHandler extends IHandler {
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
         List<DbArticles.RArticleEditWithExtra> results = List.of();
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {
-            results = DbArticles.getRecentArticleEdits(con, getDatabaseLookupCounter());
+            results = DbArticles.getRecentArticleEdits(con, new Counter());
         }
 
         List<Map> history = new ArrayList<>();
