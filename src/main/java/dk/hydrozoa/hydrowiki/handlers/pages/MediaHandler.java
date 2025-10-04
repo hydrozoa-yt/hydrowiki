@@ -14,6 +14,7 @@ import org.eclipse.jetty.http.MultiPartFormData;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.Session;
 import org.eclipse.jetty.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +68,14 @@ public class MediaHandler extends IHandler {
     }
 
     private boolean handleGet(Request request, Response response, Callback callback) {
-        InfoMessage.Message message = (InfoMessage.Message) request.getSession(false).getAttribute("infoMessage");
-        request.getSession(false).removeAttribute("infoMessage");
+        InfoMessage.Message message = null;
+        Session s = request.getSession(false);
+        if (s != null) {
+            message = (InfoMessage.Message) s.getAttribute("infoMessage");
+            if (message != null) {
+                s.removeAttribute("infoMessage");
+            }
+        }
 
         List<DbMedia.RMedia> allMedia = List.of();
         try (Connection con = getContext().getDBConnectionPool().getConnection()) {

@@ -6,6 +6,7 @@ The following libraries are used:
 * FreeMarker, for templating
 * MariaDB, for the database
 * java-diff-utils for comparison operations
+* AWS S3 for storing media
 
 ## Features
 * Wikitext parser (markdown, wikilinks and -images)
@@ -14,6 +15,8 @@ The following libraries are used:
 * Display recent changes
 * Display differences between versions
 * Users and logging in
+* Searching for articles
+* Aliases for articles for easy navigation and linking
 
 ## How to run
 ### 1) Database installation
